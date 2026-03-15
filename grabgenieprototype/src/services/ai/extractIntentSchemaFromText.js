@@ -315,36 +315,127 @@ function buildDebugJson(plan) {
 }
 
 function buildSystemInstruction() {
-  return [
-    'You are Grab Genie intent orchestrator.',
-    'Return only JSON. No markdown, no explanation.',
-    'Always keep all keys in the target schema.',
-    'Use null for unknown scalar values and [] for unknown arrays.',
-    'Resolve likely speech-to-text ambiguities when obvious from context (example: all right/alright in transport context often means a ride).',
-    'Ensure selectedServices and recommendations can include food, ride, mart independently or together.',
-    'Recommendations must include at least one alternative for every selected service when possible.',
-    'Keep reasoning concise in rationale/reason fields.'
-  ].join(' ');
+  return (
+    'You are a STRICT structured intent extraction engine for a super-app assistant. ' +
+    'Your job is to convert the user\'s request into EXACTLY one valid JSON object matching the target schema.'
+  );
 }
 
 function buildPrompt(inputText) {
-  return [
-    'Convert user request into this exact JSON structure and return only JSON.',
-    'Do not omit keys. Keep nulls/arrays when values are unknown.',
-    'Selected services must be represented under selectedPlan with enabled/selected entries where requested.',
-    'Recommendations must be present for each enabled service when possible.',
-    'User request:',
-    inputText,
-    'Target schema template:',
-    JSON.stringify(jsonFormatTemplate, null, 2)
-  ].join('\n\n');
+  const schemaBlock = JSON.stringify(jsonFormatTemplate, null, 2);
+
+  return `NON-NEGOTIABLE RULES
+
+1. Return JSON only.
+2. Do not return markdown.
+3. Do not explain anything outside the JSON.
+4. Do not rename keys.
+5. Do not remove keys.
+6. Do not add new top-level keys.
+7. Use null for unknown scalar values.
+8. Use [] for empty arrays.
+9. Preserve every meaningful user-supplied term somewhere in the JSON.
+10. If a term cannot be mapped confidently to a main field, put it in interpretation.unmappedTokens or interpretation.notes.
+11. Never silently drop meaningful information.
+
+MEANINGFUL INFORMATION INCLUDES BUT IS NOT LIMITED TO:
+- priority
+- premium
+- fastest
+- cheapest
+- budget
+- under $X
+- for N people
+- airport
+- home
+- office
+- dessert
+- sweet
+- spicy
+- healthy
+- cold
+- hot
+- after one hour
+- when I reach home
+- after I get there
+- if budget allows
+- if unavailable
+- recommend
+- replace
+- add
+- luggage
+- breakfast
+- lunch
+- dinner
+- groceries
+- ice cream
+- mart items
+
+If the user says "priority premium ride", both "priority" and "premium" must be preserved in the ride-related fields or interpretation notes. Do not collapse them into one concept unless both are still represented.
+
+If the user says something conditional like:
+- "if budget allows"
+- "if unavailable"
+- "if it fits the budget"
+- "only if"
+then preserve that inside constraints.conditionals.
+
+If the user says timing-dependent things like:
+- "after one hour"
+- "when I reach home"
+- "after I reach"
+- "before I get there"
+then preserve them inside constraints.time and service timing fields.
+
+If the user combines multiple services, enable all relevant service blocks.
+
+If the user request is contradictory, do NOT silently fix it.
+Record the contradiction in interpretation.contradictions and still produce the best possible structured interpretation.
+
+If a field is implied but not explicit, infer only when it is obvious.
+Otherwise leave it null and note uncertainty in interpretation.ambiguities or interpretation.notes.
+
+TARGET SCHEMA TEMPLATE:
+${schemaBlock}
+
+EXTRACTION INSTRUCTIONS
+
+- Fill meta.rawInput with the original user text exactly.
+- Fill meta.normalizedInput with a cleaned lowercase version.
+- Set servicesRequested.ride.enabled true only if a ride/transport request exists.
+- Set servicesRequested.food.enabled true only if a food/restaurant/snack/dessert/drink request exists.
+- Set servicesRequested.mart.enabled true only if grocery/general item/market order request exists.
+- Keep selectedPlan arrays present even when empty.
+- Keep recommendations arrays present even when empty.
+- If the user explicitly asks for recommendations, alternatives, upgrades, replacements, backups, or better options, preserve that.
+- If the user implies a better option could exist, recommendations should still be allowed.
+- If "peopleCount" appears globally and also affects food, preserve it in both relevant places where applicable.
+- If there is a budget, preserve it globally and in the relevant service budget blocks when clearly applicable.
+- If the destination is a saved-place concept like home or office, preserve that text exactly.
+- Preserve premium/priority/fastest/cheapest separately. They are not interchangeable.
+- Preserve dessert/sweet/cold separately. They are not interchangeable.
+- Preserve ride timing and food timing separately when the request implies coordination.
+
+VALIDATION BEFORE RETURNING
+
+Before returning JSON, mentally verify:
+- Did I preserve every meaningful adjective and modifier?
+- Did I preserve every budget, timing, destination, and quantity?
+- Did I preserve conditionals?
+- Did I preserve unmapped but meaningful tokens?
+- Did I preserve priority and premium separately if both exist?
+- Did I return all keys from the schema?
+- Is the output valid JSON only?
+
+USER REQUEST:
+${inputText}`;
 }
 
 function isJsonFormatShape(plan) {
   return Boolean(
     plan
     && typeof plan === 'object'
-    && plan.requestMeta
+    && (plan.meta || plan.requestMeta)
     && plan.servicesRequested
     && plan.selectedPlan
   );
