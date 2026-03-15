@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Grab Genie Slides</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    /* Base Resets */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: #f0f2f5;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+      padding: 40px;
+      color: #222222;
+    }
+
+    /* 16:9 Presentation Slide */
+    .slide {
+      width: 1920px;
+      height: 1080px;
+      background-color: #ffffff;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+      border-radius: 8px;
+    }
+
+    /* Keep bottom 20% empty for subtitles.
+       Keep right 30% empty for user camera (so safe area is Left 70% × Top 80%). */
+    .safe-area {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 70%;  /* 1344px */
+      height: 80%; /* 864px */
+      padding: 60px 80px;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      align-items: flex-start; /* Default align to left to avoid the camera area */
+    }
+
+    /* Typography */
+    h1 {
+      font-size: 80px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 24px;
+      color: #222222;
+    }
+    h2 {
+      font-size: 40px;
+      font-weight: 600;
+      color: #666666;
+      margin-bottom: 30px;
+    }
+    p, li {
+      font-size: 32px;
+      font-weight: 400;
+      color: #444444;
+      line-height: 1.5;
+    }
+
+    .accent { color: #00B14F; }
+    .orange { color: #F27A1A; }
+    
+    .centered-slide .safe-area {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    /* Components */
+    .icon-large {
+      width: 100px;
+      height: 100px;
+      margin-bottom: 32px;
+      fill: #00B14F;
+    }
+
+    .footer-text {
+      font-size: 24px;
+      color: #888888;
+      margin-top: auto;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* Diagram Elements */
+    .diagram {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      margin-top: 30px;
+      width: 100%;
+    }
+    .diagram-row {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      box-sizing: border-box;
+      width: 100%;
+    }
+    .box {
+      background: #f8f9fa;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 24px 32px;
+      font-size: 30px;
+      font-weight: 600;
+      text-align: center;
+      min-width: 250px;
+    }
+    .box.primary {
+      background: #e6f7ec;
+      border-color: #00B14F;
+      color: #00B14F;
+    }
+    .box.orange-box {
+      background: #fef2ea;
+      border-color: #F27A1A;
+      color: #F27A1A;
+    }
+    .arrow {
+      height: 40px;
+      width: 4px;
+      background: #cccccc;
+      position: relative;
+    }
+    .arrow::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: -8px;
+      border-width: 10px 10px 0;
+      border-style: solid;
+      border-color: #cccccc transparent transparent;
+    }
+
+    /* Lists */
+    ul {
+      list-style: none;
+      margin-top: 20px;
+    }
+    li {
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    li::before {
+      content: '';
+      display: block;
+      width: 16px;
+      height: 16px;
+      background-color: #00B14F;
+      border-radius: 50%;
+    }
+
+    svg {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Slide 1: Title -->
+  <div class="slide centered-slide">
+    <div class="safe-area">
+      <svg class="icon-large" viewBox="0 0 24 24" fill="none" stroke="#00B14F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" fill="#00B14F"/>
+      </svg>
+      <h1>Grab Genie</h1>
+      <h2>One Intent. Multiple Services.</h2>
+      
+      <div style="margin-top: 40px; text-align: center; color: #555;">
+        <div style="font-size: 32px; font-weight: 600; margin-bottom: 8px;">GrabHack 2.0: Shaping the Future</div>
+        <div style="font-size: 28px; font-weight: 500; margin-bottom: 24px; color: #00B14F;">Problem Statement: Building New Generative Service Offerings (Fintech)</div>
+        <div style="font-size: 28px; font-weight: 400; margin-bottom: 24px;">Team: <span style="font-weight: 600; color: #222;">Token Tribe</span></div>
+        <div style="font-size: 24px; font-weight: 300; color: #666;">Ashwin Sheoran &nbsp;·&nbsp; Akshay Bhardwaj &nbsp;·&nbsp; Shreyanshu Sharma</div>
+      </div>
+      
+      <div class="footer-text">AI Intent Engine for Super Apps</div>
+    </div>
+  </div>
+
+  <!-- Slide 2: Problem -->
+  <div class="slide">
+    <div class="safe-area">
+      <h1>Users Think in Goals.<br><span class="accent">Apps Force Them Into Services.</span></h1>
+      
+      <div class="diagram" style="margin-top: 60px;">
+        <div class="box" style="background:#222; color:white; border:none; padding:40px 80px; font-size:42px; width: 840px;">
+          User Goal: Dinner + Ride Home
+        </div>
+        
+        <div class="diagram-row" style="gap: 40px; padding-top: 20px; width: 840px;">
+          <div style="display:flex; flex-direction:column; align-items:center; flex: 1;">
+            <div class="arrow" style="margin-bottom: 20px;"></div>
+            <div class="box orange-box" style="width: 100%;">Food Tab → Order</div>
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:center; flex: 1;">
+            <div class="arrow" style="margin-bottom: 20px;"></div>
+            <div class="box primary" style="width: 100%;">Ride Tab → Book</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 3: Solution -->
+  <div class="slide centered-slide">
+    <div class="safe-area">
+      <h1>Grab Genie</h1>
+      <h2><span class="accent">AI Intent Orchestration</span></h2>
+
+      <div class="diagram" style="margin-top: 20px;">
+        <div class="box">User Request</div>
+        <div class="arrow"></div>
+        <div class="box primary" style="padding: 40px 80px; font-size: 48px;">
+          <svg style="display:inline; width:40px; margin-bottom:-4px; margin-right:12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" fill="#00B14F"/></svg>
+          Grab Genie AI
+        </div>
+        <div class="arrow"></div>
+        <div class="box">Ride &nbsp;+&nbsp; Food &nbsp;+&nbsp; Delivery</div>
+      </div>
+
+      <p style="margin-top: 40px; font-weight: 300; font-size: 32px; color: #888;">
+        One request coordinates multiple services.
+      </p>
+    </div>
+  </div>
+
+  <!-- Slide 4: Architecture -->
+  <div class="slide">
+    <div class="safe-area">
+      <h1>How It Works</h1>
+      
+      <div class="diagram" style="margin-top: 10px;">
+        <div class="box" style="width: 800px; padding: 16px;">Voice or Text Request</div>
+        <div class="arrow" style="height: 20px;"></div>
+        <div class="box primary" style="width: 800px; padding: 16px;">Intent Extraction</div>
+        <div class="arrow" style="height: 20px;"></div>
+        <div class="box primary" style="width: 800px; padding: 16px;">Structured Plan</div>
+        <div class="arrow" style="height: 20px;"></div>
+        <div class="box" style="width: 800px; padding: 16px;">Service Router</div>
+        <div class="arrow" style="height: 20px;"></div>
+        <div class="diagram-row" style="width: 800px; gap: 40px;">
+          <div class="box orange-box" style="flex:1; padding: 16px;">GrabFood</div>
+          <div class="box primary" style="flex:1; background: #e6f7ec; padding: 16px;">GrabRide</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 5: Impact -->
+  <div class="slide">
+    <div class="safe-area">
+      <h1>Towards an <span class="accent">Intent-Driven</span> Super App</h1>
+      
+      <ul style="margin-top: 60px;">
+        <li>Fewer steps for users</li>
+        <li>Higher cross-service usage</li>
+        <li>Natural AI interaction</li>
+      </ul>
+
+      <div class="footer-text" style="color: #222; text-transform:none; font-weight:400; font-size:36px; margin-top: auto;">
+        <span class="accent" style="font-weight: 600;">Grab Genie</span> simplifies everyday decisions.
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
