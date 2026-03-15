@@ -2,6 +2,27 @@
 
 This app is the first real interactive version of Grab Genie, aligned to the visual and screen-flow language of the existing demo.
 
+## Live URL
+
+- https://ashwinsheoran02.github.io/GrabGinie/
+
+## How To Use (Quick)
+
+1. Open the app home screen and tap the Grab Genie FAB.
+2. Enter a natural-language request in the text box, or tap Voice Mode.
+3. For voice:
+	- first mic tap starts recording
+	- second mic tap stops recording and sends transcription for planning
+4. Wait for processing, then review Selected for you + Recommended Alternatives.
+5. Tap Replace on recommendations to swap into selected cards.
+6. Tap Confirm All to complete and return to Home with recent activity.
+
+## AI vs Fallback Behavior
+
+- If `REACT_APP_AI_PROVIDER` and API key are configured, extraction uses live AI provider calls.
+- If AI is unavailable or fails, the app automatically uses robust local fallback planning.
+- The assistant screen shows current extraction mode so testing is transparent.
+
 ## Implemented Foundations
 
 - Multi-screen product flow: Home -> Intro -> Assistant -> Listening -> Processing -> Results -> Confirmation -> Home activity
@@ -41,11 +62,33 @@ Supported providers:
 - `openai`
 - `none` (automatic local fallback planner)
 
+Security note:
+
+- Never commit real API keys.
+- Frontend keys in `REACT_APP_*` are exposed in browser bundles; use restricted keys for prototypes.
+- For production, move AI calls to a backend proxy.
+
 ## Scripts
 
 - `npm start`: run in development
 - `npm test`: run test suite
 - `npm run build`: create production build
+
+## Local Development Steps
+
+1. `cd grabgenieprototype`
+2. `npm install`
+3. Create `.env.local` from `.env.example`
+4. `npm start`
+5. Open http://localhost:3000
+
+## Technical Notes
+
+- UI flow state machine is in `src/hooks/useGrabGenie.js`.
+- AI extraction orchestration is in `src/services/ai/extractIntentSchemaFromText.js`.
+- Voice transcription session wrapper (browser speech-to-text) is in `src/services/audio/transcribeAudio.js`.
+- Rendering models are derived by category service engines in `src/serviceEngines/`.
+- Plan schema template/normalization lives in `src/schema/planSchema.js`.
 
 ## GitHub Pages Deployment (From Parent GrabGinie Repo)
 

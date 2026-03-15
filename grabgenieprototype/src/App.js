@@ -97,7 +97,8 @@ function AssistantScreen({
   onInputChange,
   onSubmit,
   onSamplePrompt,
-  warning
+  warning,
+  aiLabel
 }) {
   return (
     <div className="screen assistant-screen">
@@ -122,6 +123,8 @@ function AssistantScreen({
           placeholder="Type one natural request..."
         />
 
+        <div className="engine-status">{aiLabel}</div>
+
         <SamplePromptChips onPickPrompt={onSamplePrompt} />
 
         {warning && <div className="warning-box">{warning}</div>}
@@ -138,11 +141,11 @@ function AssistantScreen({
   );
 }
 
-function ListeningScreen({ onDone }) {
+function ListeningScreen({ onDone, onCancel, transcript, isRecording, audioError }) {
   return (
     <div className="screen listening-screen">
       <div className="title-bar">
-        <div className="title-pad" />
+        <button className="icon-btn" onClick={onCancel}><BackArrow /></button>
         <span className="title-bar-text">Listening...</span>
         <div className="title-pad" />
       </div>
@@ -152,7 +155,11 @@ function ListeningScreen({ onDone }) {
           <div className="pulse-circle delay" />
           <button className="mic-btn listening-mic" onClick={onDone}><MicIcon size={34} /></button>
         </div>
-        <div className="transcript">Audio pipeline placeholder. Tap mic again to return to typed extraction.</div>
+        <div className="listening-help">
+          {isRecording ? 'Tap mic again to stop and generate your plan.' : 'Finalizing transcript and building your plan...'}
+        </div>
+        <div className="transcript">{transcript || 'Start speaking. Your words will appear here in real-time.'}</div>
+        {audioError && <div className="warning-box">{audioError}</div>}
       </div>
     </div>
   );
@@ -269,6 +276,9 @@ function App() {
   const confidenceLine = typeof confidence?.overall === 'number'
     ? `Interpretation confidence ${(confidence.overall * 100).toFixed(0)}%`
     : confidence?.explanation;
+  const aiLabel = genie.aiEnabled
+    ? `AI extraction active (${genie.aiConfig.provider})`
+    : 'AI key not configured. Using robust local fallback planner.';
 
   return (
     <div className="app-root">
@@ -292,11 +302,18 @@ function App() {
               onSamplePrompt={genie.setInputText}
               onSubmit={() => genie.submitText()}
               warning={genie.extractMeta.warning}
+              aiLabel={aiLabel}
             />
           )}
 
           {genie.screen === genie.screens.LISTENING && (
-            <ListeningScreen onDone={() => genie.submitText(genie.inputText)} />
+            <ListeningScreen
+              onDone={genie.stopListeningAndSubmit}
+              onCancel={genie.cancelListening}
+              transcript={genie.audioTranscript}
+              isRecording={genie.isRecordingAudio}
+              audioError={genie.audioError}
+            />
           )}
 
           {genie.screen === genie.screens.PROCESSING && (

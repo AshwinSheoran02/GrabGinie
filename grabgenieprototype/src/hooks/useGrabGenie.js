@@ -1,7 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { extractIntentSchemaFromText } from '../services/ai/extractIntentSchemaFromText';
 import { buildSelectedViewModels, buildRecommendationViewModels, calculateTotal } from '../serviceEngines';
 import { createEmptyPlan, normalizePlan } from '../schema/planSchema';
+import { getAiConfig, hasAiProvider } from '../services/ai/aiConfig';
+import { createTranscriptionSession, isSpeechToTextSupported } from '../services/audio/transcribeAudio';
 
 const SCREEN = {
   HOME: 'home',
@@ -48,13 +50,19 @@ function applyReplacement(plan, category, recommendationId) {
 }
 
 export function useGrabGenie() {
+  const aiConfig = useMemo(() => getAiConfig(), []);
+  const audioSessionRef = useRef(null);
+
   const [screen, setScreen] = useState(SCREEN.HOME);
-  const [inputText, setInputText] = useState('Chinese dinner for four under $30 and a ride home after one hour.');
+  const [inputText, setInputText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [hasOrdered, setHasOrdered] = useState(false);
   const [activity, setActivity] = useState([]);
   const [plan, setPlan] = useState(createEmptyPlan(''));
   const [extractMeta, setExtractMeta] = useState({ source: 'none', provider: 'none', warning: null });
+  const [audioTranscript, setAudioTranscript] = useState('');
+  const [audioError, setAudioError] = useState(null);
+  const [isRecordingAudio, setIsRecordingAudio] = useState(false);
 
   const selectedView = useMemo(() => buildSelectedViewModels(plan.selectedServices), [plan]);
   const recommendationView = useMemo(() => buildRecommendationViewModels(plan.recommendations), [plan]);
@@ -68,7 +76,36 @@ export function useGrabGenie() {
 
   const backToAssistant = () => setScreen(SCREEN.ASSISTANT);
 
-  const startListening = () => setScreen(SCREEN.LISTENING);
+  const startListening = () => {
+    setAudioError(null);
+    setAudioTranscript('');
+    setScreen(SCREEN.LISTENING);
+
+    if (!isSpeechToTextSupported()) {
+      setAudioError('Speech-to-text is not available in this browser. Please type your request.');
+      return;
+    }
+
+    try {
+      const session = createTranscriptionSession({
+        language: 'en-US',
+        onTranscript: (text) => setAudioTranscript(text),
+        onError: (message) => setAudioError(message)
+      });
+
+      if (!session) {
+        setAudioError('Speech-to-text is not available in this browser. Please type your request.');
+        return;
+      }
+
+      audioSessionRef.current = session;
+      session.start();
+      setIsRecordingAudio(true);
+    } catch (error) {
+      setAudioError(error.message || 'Unable to start microphone capture.');
+      setIsRecordingAudio(false);
+    }
+  };
 
   const submitText = async (overrideText) => {
     const text = (overrideText ?? inputText).trim();
@@ -79,12 +116,66 @@ export function useGrabGenie() {
     setIsProcessing(true);
     setScreen(SCREEN.PROCESSING);
 
+    const startedAt = Date.now();
+
     const result = await extractIntentSchemaFromText(text);
+
+    const elapsed = Date.now() - startedAt;
+    const minimumProcessingMs = 950;
+    if (elapsed < minimumProcessingMs) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, minimumProcessingMs - elapsed);
+      });
+    }
 
     setPlan(result.plan);
     setExtractMeta(result.meta);
     setIsProcessing(false);
     setScreen(SCREEN.RESULTS);
+  };
+
+  const stopListeningAndSubmit = async () => {
+    const session = audioSessionRef.current;
+
+    if (!session) {
+      setScreen(SCREEN.ASSISTANT);
+      return;
+    }
+
+    setIsRecordingAudio(false);
+
+    let spokenText = '';
+    try {
+      spokenText = await session.stop();
+    } catch (error) {
+      setAudioError(error.message || 'Unable to complete transcription.');
+      setScreen(SCREEN.ASSISTANT);
+      audioSessionRef.current = null;
+      return;
+    }
+
+    audioSessionRef.current = null;
+
+    const finalText = (spokenText || audioTranscript || '').trim();
+
+    if (!finalText) {
+      setAudioError('No speech detected. Tap voice mode and try again.');
+      setScreen(SCREEN.ASSISTANT);
+      return;
+    }
+
+    setInputText(finalText);
+    await submitText(finalText);
+  };
+
+  const cancelListening = () => {
+    if (audioSessionRef.current) {
+      audioSessionRef.current.cancel();
+      audioSessionRef.current = null;
+    }
+
+    setIsRecordingAudio(false);
+    setScreen(SCREEN.ASSISTANT);
   };
 
   const replaceSelection = (category, recommendationId) => {
@@ -144,14 +235,21 @@ export function useGrabGenie() {
     activity,
     plan,
     extractMeta,
+    aiConfig,
+    aiEnabled: hasAiProvider(aiConfig),
     selectedView,
     recommendationView,
     total,
+    audioTranscript,
+    audioError,
+    isRecordingAudio,
     startFlow,
     startAssistant,
     backHome,
     backToAssistant,
     startListening,
+    stopListeningAndSubmit,
+    cancelListening,
     submitText,
     replaceSelection,
     confirmPlan,
