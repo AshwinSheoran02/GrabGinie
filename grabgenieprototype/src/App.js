@@ -141,7 +141,7 @@ function AssistantScreen({
   );
 }
 
-function ListeningScreen({ onDone, onCancel, transcript, isRecording, audioError }) {
+function ListeningScreen({ onDone, onCancel, isRecording, isStopping, audioError }) {
   return (
     <div className="screen listening-screen">
       <div className="title-bar">
@@ -153,12 +153,19 @@ function ListeningScreen({ onDone, onCancel, transcript, isRecording, audioError
         <div className="pulse-ring">
           <div className="pulse-circle" />
           <div className="pulse-circle delay" />
-          <button className="mic-btn listening-mic" onClick={onDone}><MicIcon size={34} /></button>
+          <button
+            className="mic-btn listening-mic"
+            onClick={onDone}
+            disabled={!isRecording || isStopping}
+          >
+            <MicIcon size={34} />
+          </button>
         </div>
         <div className="listening-help">
-          {isRecording ? 'Tap mic again to stop and generate your plan.' : 'Finalizing transcript and building your plan...'}
+          {isRecording && !isStopping
+            ? 'Tap mic again to stop and generate your plan.'
+            : 'Finalizing transcript and building your plan...'}
         </div>
-        <div className="transcript">{transcript || 'Start speaking. Your words will appear here in real-time.'}</div>
         {audioError && <div className="warning-box">{audioError}</div>}
       </div>
     </div>
@@ -278,7 +285,13 @@ function App() {
     : confidence?.explanation;
   const aiLabel = genie.aiEnabled
     ? `AI extraction active (${genie.aiConfig.provider})`
-    : 'AI key not configured. Using robust local fallback planner.';
+    : genie.aiConfig.provider === 'gemini'
+      ? 'Gemini selected, but API key is not loaded in this running build. Restart after updating .env.local.'
+      : 'AI provider not configured. Using robust local fallback planner.';
+  const displayAiLabel = genie.extractMeta.source === 'fallback-after-ai-error'
+    ? 'AI temporarily unavailable. Smart fallback generated this plan.'
+    : aiLabel;
+  const assistantWarning = null;
 
   return (
     <div className="app-root">
@@ -301,8 +314,8 @@ function App() {
               onInputChange={genie.setInputText}
               onSamplePrompt={genie.setInputText}
               onSubmit={() => genie.submitText()}
-              warning={genie.extractMeta.warning}
-              aiLabel={aiLabel}
+              warning={assistantWarning}
+              aiLabel={displayAiLabel}
             />
           )}
 
@@ -310,8 +323,8 @@ function App() {
             <ListeningScreen
               onDone={genie.stopListeningAndSubmit}
               onCancel={genie.cancelListening}
-              transcript={genie.audioTranscript}
               isRecording={genie.isRecordingAudio}
+              isStopping={genie.isStoppingAudio}
               audioError={genie.audioError}
             />
           )}

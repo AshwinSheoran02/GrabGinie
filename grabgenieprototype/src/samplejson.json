@@ -1,0 +1,361 @@
+{
+  "requestMeta": {
+    "requestId": "uuid-or-timestamp",
+    "rawInput": {
+      "mode": "voice",
+      "text": "Chinese dinner for four under $30 and a ride home after one hour",
+      "audioRef": null,
+      "language": "en"
+    },
+    "normalizedInput": "chinese dinner for four under $30 and a ride home after one hour",
+    "timestamp": "2026-03-15T12:00:00Z",
+    "userContext": {
+      "userId": null,
+      "currentLocation": null,
+      "savedPlaces": {
+        "home": null,
+        "office": null
+      },
+      "preferences": {
+        "dietary": [],
+        "allergies": [],
+        "favoriteCuisines": [],
+        "preferredRideTypes": [],
+        "preferredMartCategories": []
+      }
+    }
+  },
+  "interpretation": {
+    "intentType": "multi_service",
+    "confidence": 0.93,
+    "status": "parsed",
+    "ambiguities": [],
+    "contradictions": [],
+    "missingCriticalFields": [],
+    "notes": [],
+    "fallbackStrategy": {
+      "used": false,
+      "reason": null,
+      "appliedHeuristics": []
+    }
+  },
+  "constraints": {
+    "globalBudget": {
+      "enabled": true,
+      "currency": "USD",
+      "amount": 30
+    },
+    "globalPriority": {
+      "mode": "balanced",
+      "alternativesConsidered": ["cheapest", "fastest", "best_rated", "balanced"]
+    },
+    "timing": {
+      "requestTimeType": "relative",
+      "requestedExecutionWindow": null,
+      "deliveryAfterArrival": false,
+      "deliveryBeforeArrival": false,
+      "coordinateServices": true
+    }
+  },
+  "servicePlan": {
+    "selected": {
+      "food": [
+        {
+          "enabled": true,
+          "serviceType": "food",
+          "requestLabel": "main_food",
+          "category": "meal",
+          "subcategory": "dinner",
+          "cuisine": "Chinese",
+          "itemQuery": "Chinese dinner",
+          "itemName": "Family Chow Mein Combo",
+          "vendorName": "Dragon Noodles",
+          "vendorId": null,
+          "peopleCount": 4,
+          "dietaryTags": [],
+          "temperaturePreference": null,
+          "flavorPreferences": [],
+          "quantity": 1,
+          "price": {
+            "currency": "USD",
+            "amount": 27
+          },
+          "etaMinutes": 30,
+          "deliveryMode": "delivery",
+          "scheduledFor": null,
+          "deliveryTimingRule": {
+            "type": "asap",
+            "relativeToRideArrival": null,
+            "bufferMinutes": null
+          },
+          "destination": {
+            "type": "saved_place",
+            "value": "home"
+          },
+          "qualitySignals": {
+            "rating": 4.8,
+            "popularityScore": 0.87,
+            "matchReason": "Best match for cuisine, people count, and budget"
+          },
+          "edgeCaseHandling": {
+            "originalConstraintFit": "partial",
+            "constraintAdjustments": [],
+            "notes": []
+          }
+        }
+      ],
+      "ride": [
+        {
+          "enabled": true,
+          "serviceType": "ride",
+          "requestLabel": "primary_ride",
+          "rideType": "Budget",
+          "vehicleClass": "sedan",
+          "pickupLocation": {
+            "type": "current_location",
+            "value": null
+          },
+          "destination": {
+            "type": "saved_place",
+            "value": "home"
+          },
+          "scheduled": true,
+          "pickupInMinutes": 60,
+          "price": {
+            "currency": "USD",
+            "amount": 8
+          },
+          "etaToPickupMinutes": 5,
+          "etaToDestinationMinutes": 22,
+          "preferences": {
+            "priority": "balanced",
+            "luggageNeeded": false,
+            "seatsRequired": 1,
+            "premiumPreferred": false
+          },
+          "qualitySignals": {
+            "driverAvailabilityScore": 0.81,
+            "matchReason": "Best value ride matching timing request"
+          },
+          "edgeCaseHandling": {
+            "originalConstraintFit": "full",
+            "constraintAdjustments": [],
+            "notes": []
+          }
+        }
+      ],
+      "mart": [
+        {
+          "enabled": false,
+          "serviceType": "mart",
+          "requestLabel": "primary_mart",
+          "category": null,
+          "subcategory": null,
+          "itemQuery": null,
+          "items": [],
+          "storeName": null,
+          "storeId": null,
+          "price": {
+            "currency": "USD",
+            "amount": null
+          },
+          "etaMinutes": null,
+          "scheduledFor": null,
+          "destination": {
+            "type": null,
+            "value": null
+          },
+          "qualitySignals": {
+            "matchReason": null
+          },
+          "edgeCaseHandling": {
+            "originalConstraintFit": null,
+            "constraintAdjustments": [],
+            "notes": []
+          }
+        }
+      ]
+    },
+    "recommendations": {
+      "food": [
+        {
+          "serviceType": "food",
+          "category": "dessert",
+          "subcategory": "ice_cream",
+          "cuisine": null,
+          "itemQuery": "mango ice cream",
+          "itemName": "Alphonso Mango Ice Cream",
+          "vendorName": "Cool Scoops",
+          "price": {
+            "currency": "USD",
+            "amount": 6
+          },
+          "etaMinutes": 18,
+          "destination": {
+            "type": "saved_place",
+            "value": "home"
+          },
+          "recommendationReason": "Popular sweet add-on that matches the user's likely dessert intent",
+          "actionType": "replace_or_add",
+          "priorityScore": 0.91
+        },
+        {
+          "serviceType": "food",
+          "category": "dessert",
+          "subcategory": "kulfi",
+          "cuisine": null,
+          "itemQuery": "mango kulfi",
+          "itemName": "Mango Kulfi",
+          "vendorName": "Royal Desserts",
+          "price": {
+            "currency": "USD",
+            "amount": 5
+          },
+          "etaMinutes": 20,
+          "destination": {
+            "type": "saved_place",
+            "value": "home"
+          },
+          "recommendationReason": "Lower-cost dessert alternative with similar flavor profile",
+          "actionType": "replace_or_add",
+          "priorityScore": 0.84
+        }
+      ],
+      "ride": [
+        {
+          "serviceType": "ride",
+          "rideType": "Priority",
+          "vehicleClass": "sedan",
+          "pickupLocation": {
+            "type": "current_location",
+            "value": null
+          },
+          "destination": {
+            "type": "saved_place",
+            "value": "home"
+          },
+          "scheduled": true,
+          "pickupInMinutes": 60,
+          "price": {
+            "currency": "USD",
+            "amount": 11
+          },
+          "etaToPickupMinutes": 2,
+          "etaToDestinationMinutes": 20,
+          "recommendationReason": "Faster pickup than the selected ride",
+          "actionType": "replace",
+          "priorityScore": 0.88
+        },
+        {
+          "serviceType": "ride",
+          "rideType": "Premium",
+          "vehicleClass": "premium_sedan",
+          "pickupLocation": {
+            "type": "current_location",
+            "value": null
+          },
+          "destination": {
+            "type": "saved_place",
+            "value": "home"
+          },
+          "scheduled": true,
+          "pickupInMinutes": 60,
+          "price": {
+            "currency": "USD",
+            "amount": 15
+          },
+          "etaToPickupMinutes": 4,
+          "etaToDestinationMinutes": 19,
+          "recommendationReason": "Higher comfort option with only a modest price increase",
+          "actionType": "replace",
+          "priorityScore": 0.72
+        }
+      ],
+      "mart": [
+        {
+          "serviceType": "mart",
+          "category": "grocery",
+          "subcategory": "dessert_addon",
+          "itemQuery": "frozen dessert",
+          "items": [
+            {
+              "itemName": "Mango Ice Cream Tub",
+              "quantity": 1,
+              "unitPrice": {
+                "currency": "USD",
+                "amount": 7
+              }
+            }
+          ],
+          "storeName": "GrabMart Fresh",
+          "price": {
+            "currency": "USD",
+            "amount": 7
+          },
+          "etaMinutes": 15,
+          "destination": {
+            "type": "saved_place",
+            "value": "home"
+          },
+          "recommendationReason": "Good alternative if restaurant dessert options are limited",
+          "actionType": "add_or_replace",
+          "priorityScore": 0.66
+        }
+      ]
+    }
+  },
+  "budgeting": {
+    "selectedSubtotal": {
+      "currency": "USD",
+      "amount": 35
+    },
+    "recommendationImpacts": [
+      {
+        "recommendationRef": "ride.priority",
+        "deltaAmount": 3
+      },
+      {
+        "recommendationRef": "food.mango_ice_cream",
+        "deltaAmount": 6
+      }
+    ],
+    "budgetFit": {
+      "globalBudgetSatisfied": false,
+      "explanation": "Selected services slightly exceed the stated budget but provide the closest feasible match"
+    }
+  },
+  "timingPlan": {
+    "overallPlanType": "coordinated_multi_service",
+    "steps": [
+      {
+        "sequence": 1,
+        "serviceType": "ride",
+        "action": "pickup",
+        "scheduledInMinutes": 60
+      },
+      {
+        "sequence": 2,
+        "serviceType": "food",
+        "action": "deliver",
+        "scheduledInMinutes": 90
+      }
+    ],
+    "synchronizationNotes": [
+      "Food is timed to arrive after the expected ride completion"
+    ]
+  },
+  "uiHints": {
+    "showConfirmation": true,
+    "showRecommendations": true,
+    "showBudgetWarning": true,
+    "showTimingExplanation": true,
+    "showConstraintAdjustmentMessage": true
+  },
+  "finalNarrative": {
+    "userFacingSummary": "We selected a Chinese dinner option and a ride home after one hour, and also found faster and sweeter alternatives you may prefer.",
+    "userFacingWarnings": [],
+    "userFacingAdjustments": [
+      "Budget target was slightly exceeded to preserve feasibility"
+    ]
+  }
+}

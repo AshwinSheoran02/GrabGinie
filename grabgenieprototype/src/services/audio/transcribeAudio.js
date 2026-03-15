@@ -28,6 +28,17 @@ export function createTranscriptionSession({ language = 'en-US', onTranscript, o
   let latestText = '';
   let settleStop = null;
   let settleStopError = null;
+  let stopTimeoutId = null;
+
+  const clearStopSettlement = () => {
+    if (stopTimeoutId) {
+      clearTimeout(stopTimeoutId);
+      stopTimeoutId = null;
+    }
+
+    settleStop = null;
+    settleStopError = null;
+  };
 
   const rebuildTranscript = (interimText = '') => {
     latestText = [...finalizedParts, interimText].join(' ').trim();
@@ -67,8 +78,7 @@ export function createTranscriptionSession({ language = 'en-US', onTranscript, o
 
     if (settleStopError) {
       settleStopError(new Error(message));
-      settleStop = null;
-      settleStopError = null;
+      clearStopSettlement();
     }
   };
 
@@ -78,8 +88,7 @@ export function createTranscriptionSession({ language = 'en-US', onTranscript, o
 
     if (settleStop) {
       settleStop(latestText.trim());
-      settleStop = null;
-      settleStopError = null;
+      clearStopSettlement();
     }
   };
 
@@ -99,6 +108,14 @@ export function createTranscriptionSession({ language = 'en-US', onTranscript, o
         settleStop = resolve;
         settleStopError = reject;
         recognition.stop();
+
+        // Some browsers occasionally miss onend; resolve with latest transcript.
+        stopTimeoutId = setTimeout(() => {
+          if (settleStop) {
+            settleStop(latestText.trim());
+            clearStopSettlement();
+          }
+        }, 1400);
       });
     },
     cancel() {

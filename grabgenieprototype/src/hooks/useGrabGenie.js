@@ -15,6 +15,17 @@ const SCREEN = {
   CONFIRMATION: 'confirmation'
 };
 
+function normalizeVoiceTranscript(rawText) {
+  let text = (rawText || '').trim();
+
+  // Common STT confusion for ride requests: "all right" or "alright".
+  text = text.replace(/\b(all right|alright|a right)\b(?=\s+(to|home|airport|station|office|mall|hotel|back|now|later)\b)/gi, 'a ride');
+  text = text.replace(/\b(book|need|get|call)\s+me\s+all\s+ride\b/gi, '$1 me a ride');
+  text = text.replace(/\bfor\s+me\s+to\s+(home|airport|station|office|mall|hotel)\b/gi, 'for me a ride to $1');
+
+  return text.replace(/\s{2,}/g, ' ').trim();
+}
+
 function applyReplacement(plan, category, recommendationId) {
   const recommendation = (plan.recommendations?.[category] || []).find((entry) => entry.recommendationId === recommendationId);
 
@@ -52,6 +63,7 @@ function applyReplacement(plan, category, recommendationId) {
 export function useGrabGenie() {
   const aiConfig = useMemo(() => getAiConfig(), []);
   const audioSessionRef = useRef(null);
+  const transcriptRef = useRef('');
 
   const [screen, setScreen] = useState(SCREEN.HOME);
   const [inputText, setInputText] = useState('');
@@ -63,6 +75,7 @@ export function useGrabGenie() {
   const [audioTranscript, setAudioTranscript] = useState('');
   const [audioError, setAudioError] = useState(null);
   const [isRecordingAudio, setIsRecordingAudio] = useState(false);
+  const [isStoppingAudio, setIsStoppingAudio] = useState(false);
 
   const selectedView = useMemo(() => buildSelectedViewModels(plan.selectedServices), [plan]);
   const recommendationView = useMemo(() => buildRecommendationViewModels(plan.recommendations), [plan]);
@@ -77,8 +90,14 @@ export function useGrabGenie() {
   const backToAssistant = () => setScreen(SCREEN.ASSISTANT);
 
   const startListening = () => {
+    if (audioSessionRef.current) {
+      audioSessionRef.current.cancel();
+      audioSessionRef.current = null;
+    }
+
     setAudioError(null);
     setAudioTranscript('');
+    transcriptRef.current = '';
     setScreen(SCREEN.LISTENING);
 
     if (!isSpeechToTextSupported()) {
@@ -89,7 +108,10 @@ export function useGrabGenie() {
     try {
       const session = createTranscriptionSession({
         language: 'en-US',
-        onTranscript: (text) => setAudioTranscript(text),
+        onTranscript: (text) => {
+          transcriptRef.current = text;
+          setAudioTranscript(text);
+        },
         onError: (message) => setAudioError(message)
       });
 
@@ -107,15 +129,7 @@ export function useGrabGenie() {
     }
   };
 
-  const submitText = async (overrideText) => {
-    const text = (overrideText ?? inputText).trim();
-    if (!text) {
-      return;
-    }
-
-    setIsProcessing(true);
-    setScreen(SCREEN.PROCESSING);
-
+  const processRequest = async (text) => {
     const startedAt = Date.now();
 
     const result = await extractIntentSchemaFromText(text);
@@ -134,7 +148,22 @@ export function useGrabGenie() {
     setScreen(SCREEN.RESULTS);
   };
 
+  const submitText = async (overrideText) => {
+    const text = (overrideText ?? inputText).trim();
+    if (!text) {
+      return;
+    }
+
+    setIsProcessing(true);
+    setScreen(SCREEN.PROCESSING);
+    await processRequest(text);
+  };
+
   const stopListeningAndSubmit = async () => {
+    if (isStoppingAudio) {
+      return;
+    }
+
     const session = audioSessionRef.current;
 
     if (!session) {
@@ -142,30 +171,49 @@ export function useGrabGenie() {
       return;
     }
 
+    setIsStoppingAudio(true);
     setIsRecordingAudio(false);
+
+    // Move to processing immediately on second mic tap for clear flow feedback.
+    setIsProcessing(true);
+    setScreen(SCREEN.PROCESSING);
 
     let spokenText = '';
     try {
-      spokenText = await session.stop();
+      const stopResult = await Promise.race([
+        session.stop(),
+        new Promise((resolve) => {
+          setTimeout(() => resolve(''), 900);
+        })
+      ]);
+      spokenText = typeof stopResult === 'string' ? stopResult : '';
     } catch (error) {
       setAudioError(error.message || 'Unable to complete transcription.');
+      setIsProcessing(false);
       setScreen(SCREEN.ASSISTANT);
       audioSessionRef.current = null;
+      setIsStoppingAudio(false);
       return;
     }
 
     audioSessionRef.current = null;
 
-    const finalText = (spokenText || audioTranscript || '').trim();
+    const finalText = normalizeVoiceTranscript(spokenText || transcriptRef.current || audioTranscript || '');
 
     if (!finalText) {
       setAudioError('No speech detected. Tap voice mode and try again.');
+      setIsProcessing(false);
       setScreen(SCREEN.ASSISTANT);
+      setIsStoppingAudio(false);
       return;
     }
 
     setInputText(finalText);
-    await submitText(finalText);
+    try {
+      await processRequest(finalText);
+    } finally {
+      setIsStoppingAudio(false);
+    }
   };
 
   const cancelListening = () => {
@@ -175,6 +223,7 @@ export function useGrabGenie() {
     }
 
     setIsRecordingAudio(false);
+    setIsStoppingAudio(false);
     setScreen(SCREEN.ASSISTANT);
   };
 
@@ -243,6 +292,7 @@ export function useGrabGenie() {
     audioTranscript,
     audioError,
     isRecordingAudio,
+    isStoppingAudio,
     startFlow,
     startAssistant,
     backHome,

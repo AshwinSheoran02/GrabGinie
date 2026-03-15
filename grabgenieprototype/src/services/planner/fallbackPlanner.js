@@ -1,5 +1,54 @@
 import { createEmptyPlan, normalizePlan, SERVICE_CATEGORY } from '../../schema/planSchema';
 
+const NUMBER_WORDS = {
+  one: 1,
+  two: 2,
+  three: 3,
+  four: 4,
+  five: 5,
+  six: 6,
+  seven: 7,
+  eight: 8,
+  nine: 9,
+  ten: 10,
+  eleven: 11,
+  twelve: 12,
+  thirteen: 13,
+  fourteen: 14,
+  fifteen: 15,
+  sixteen: 16,
+  seventeen: 17,
+  eighteen: 18,
+  nineteen: 19,
+  twenty: 20,
+  thirty: 30,
+  forty: 40,
+  fifty: 50,
+  sixty: 60
+};
+
+function wordToNumber(word) {
+  if (!word) {
+    return null;
+  }
+
+  return NUMBER_WORDS[word.toLowerCase()] ?? null;
+}
+
+function normalizeInputText(rawText) {
+  const text = (rawText || '').trim();
+  if (!text) {
+    return text;
+  }
+
+  return text
+    .replace(/\bpremium\s+right\s+to\b/gi, 'premium ride to')
+    .replace(/\bright\s+to\s+(the\s+)?airport\b/gi, 'ride to airport')
+    .replace(/\ball\s+right\b/gi, 'a ride')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
 function pickCurrency(text) {
   if (/\bsgd\b|s\$/i.test(text)) {
     return 'SGD';
@@ -8,13 +57,25 @@ function pickCurrency(text) {
 }
 
 function parseBudget(text) {
-  const match = text.match(/(?:under|below|budget|max|within)\s*\$?\s*(\d+(?:\.\d+)?)/i) || text.match(/\$\s*(\d+(?:\.\d+)?)/i);
-  return match ? Number(match[1]) : null;
+  const numericMatch = text.match(/(?:under|below|budget|max|within)\s*\$?\s*(\d+(?:\.\d+)?)/i) || text.match(/\$\s*(\d+(?:\.\d+)?)/i);
+  if (numericMatch) {
+    return Number(numericMatch[1]);
+  }
+
+  const wordMatch = text.match(/(?:under|below|budget|max|within)\s+([a-z]+)\s*(?:dollars?|bucks?)?/i);
+  const parsed = wordToNumber(wordMatch?.[1]);
+  return typeof parsed === 'number' ? parsed : null;
 }
 
 function parseParty(text) {
-  const match = text.match(/(?:for|party of)\s*(\d+)/i);
-  return match ? Number(match[1]) : null;
+  const numericMatch = text.match(/(?:for|party of)\s*(\d+)/i);
+  if (numericMatch) {
+    return Number(numericMatch[1]);
+  }
+
+  const wordMatch = text.match(/(?:for|party of)\s+([a-z]+)/i);
+  const parsed = wordToNumber(wordMatch?.[1]);
+  return typeof parsed === 'number' ? parsed : null;
 }
 
 function parseDelayMinutes(text) {
@@ -24,7 +85,13 @@ function parseDelayMinutes(text) {
   }
 
   const minute = text.match(/(\d+)\s*min/i);
-  return minute ? Number(minute[1]) : null;
+  if (minute) {
+    return Number(minute[1]);
+  }
+
+  const minuteWord = text.match(/\b([a-z]+)\s+minutes?\b/i);
+  const parsed = wordToNumber(minuteWord?.[1]);
+  return typeof parsed === 'number' ? parsed : null;
 }
 
 function inferCuisine(text) {
@@ -40,18 +107,19 @@ function includesAny(text, keywords) {
 }
 
 export function buildFallbackPlan(inputText) {
-  const text = (inputText || '').toLowerCase();
+  const normalizedInput = normalizeInputText(inputText);
+  const text = normalizedInput.toLowerCase();
   const currency = pickCurrency(text);
   const budget = parseBudget(text);
   const partySize = parseParty(text);
   const delayMins = parseDelayMinutes(text);
 
-  const hasFood = includesAny(text, ['food', 'dinner', 'lunch', 'breakfast', 'eat', 'restaurant', 'ice cream', 'dessert', 'meal', 'noodle', 'pizza']);
-  const hasRide = includesAny(text, ['ride', 'car', 'taxi', 'drop', 'pickup', 'go home', 'go to', 'trip', 'transport']);
+  const hasFood = includesAny(text, ['food', 'dinner', 'lunch', 'breakfast', 'eat', 'restaurant', 'ice cream', 'dessert', 'meal', 'noodle', 'pizza', 'sushi', 'order']);
+  const hasRide = includesAny(text, ['ride', 'car', 'taxi', 'drop', 'pickup', 'go home', 'go to', 'trip', 'transport', 'right to']);
   const hasMart = includesAny(text, ['mart', 'grocery', 'groceries', 'milk', 'snack', 'snacks', 'item', 'items', 'buy', 'shop', 'delivery']);
 
-  const plan = createEmptyPlan(inputText);
-  plan.requestMeta.normalizedText = inputText.trim();
+  const plan = createEmptyPlan(normalizedInput);
+  plan.requestMeta.normalizedText = normalizedInput;
   plan.interpretation.intents = [
     ...(hasFood ? [SERVICE_CATEGORY.FOOD] : []),
     ...(hasRide ? [SERVICE_CATEGORY.RIDE] : []),
@@ -295,5 +363,5 @@ export function buildFallbackPlan(inputText) {
     'Recommendations are optimized for replace interactions.'
   ];
 
-  return normalizePlan(plan, inputText);
+  return normalizePlan(plan, normalizedInput);
 }
