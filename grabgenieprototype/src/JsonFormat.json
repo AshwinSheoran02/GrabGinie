@@ -1,0 +1,230 @@
+{
+  "meta": {
+    "requestId": null,
+    "timestamp": null,
+    "inputMode": null,
+    "rawInput": null,
+    "normalizedInput": null,
+    "language": null
+  },
+
+  "intent": {
+    "primaryGoal": null,
+    "secondaryGoals": [],
+    "peopleCount": null,
+    "priorityLevel": null,
+    "urgency": null,
+    "confidence": null
+  },
+
+  "constraints": {
+    "budget": {
+      "enabled": null,
+      "currency": null,
+      "amount": null
+    },
+    "time": {
+      "mode": null,
+      "scheduledFor": null,
+      "relativeDelayMinutes": null,
+      "deadline": null
+    },
+    "preferences": {
+      "fastest": null,
+      "cheapest": null,
+      "premium": null,
+      "priority": null,
+      "healthy": null,
+      "sweet": null,
+      "spicy": null,
+      "cold": null,
+      "hot": null,
+      "vegetarian": null,
+      "vegan": null
+    }
+  },
+
+  "servicesRequested": {
+
+    "ride": {
+      "enabled": null,
+
+      "pickup": {
+        "label": null,
+        "lat": null,
+        "lng": null
+      },
+
+      "destination": {
+        "label": null,
+        "lat": null,
+        "lng": null
+      },
+
+      "ridePreferences": {
+        "vehicleClass": null,
+        "premium": null,
+        "priority": null,
+        "fastest": null,
+        "cheapest": null,
+        "luggage": null,
+        "seatCount": null
+      },
+
+      "timing": {
+        "pickupMode": null,
+        "pickupTime": null,
+        "afterEvent": null
+      }
+    },
+
+    "food": {
+      "enabled": null,
+
+      "cuisine": null,
+      "itemQuery": null,
+      "mealType": null,
+
+      "peopleCount": null,
+
+      "dietary": {
+        "veg": null,
+        "vegan": null,
+        "glutenFree": null,
+        "healthy": null
+      },
+
+      "taste": {
+        "sweet": null,
+        "spicy": null,
+        "cold": null,
+        "hot": null
+      },
+
+      "budget": {
+        "currency": null,
+        "amount": null
+      },
+
+      "delivery": {
+        "destination": null,
+        "timingMode": null,
+        "afterRide": null
+      }
+    },
+
+    "mart": {
+      "enabled": null,
+
+      "category": null,
+      "subcategory": null,
+      "itemQuery": null,
+
+      "items": [
+        {
+          "name": null,
+          "quantity": null,
+          "unit": null
+        }
+      ],
+
+      "budget": {
+        "currency": null,
+        "amount": null
+      },
+
+      "delivery": {
+        "destination": null,
+        "timingMode": null
+      }
+    }
+  },
+
+  "selectedPlan": {
+
+    "ride": [
+      {
+        "selected": null,
+        "rideType": null,
+        "vehicleClass": null,
+        "price": null,
+        "etaMinutes": null,
+        "pickup": null,
+        "destination": null
+      }
+    ],
+
+    "food": [
+      {
+        "selected": null,
+        "restaurant": null,
+        "item": null,
+        "price": null,
+        "etaMinutes": null,
+        "quantity": null
+      }
+    ],
+
+    "mart": [
+      {
+        "selected": null,
+        "store": null,
+        "items": [],
+        "price": null,
+        "etaMinutes": null
+      }
+    ]
+  },
+
+  "recommendations": {
+
+    "ride": [
+      {
+        "rideType": null,
+        "vehicleClass": null,
+        "price": null,
+        "etaMinutes": null,
+        "reason": null
+      }
+    ],
+
+    "food": [
+      {
+        "restaurant": null,
+        "item": null,
+        "price": null,
+        "etaMinutes": null,
+        "reason": null
+      }
+    ],
+
+    "mart": [
+      {
+        "store": null,
+        "items": [],
+        "price": null,
+        "etaMinutes": null,
+        "reason": null
+      }
+    ]
+  },
+
+  "orchestration": {
+    "steps": [
+      {
+        "sequence": null,
+        "service": null,
+        "action": null,
+        "scheduledFor": null,
+        "dependsOn": null
+      }
+    ]
+  },
+
+  "interpretation": {
+    "ambiguities": [],
+    "contradictions": [],
+    "unmappedTokens": [],
+    "notes": []
+  }
+}

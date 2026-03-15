@@ -1,4 +1,6 @@
-import { buildSchemaTemplate, normalizePlan } from '../../schema/planSchema';
+import { normalizePlan } from '../../schema/planSchema';
+import jsonFormatTemplate from '../../JsonFormat.json';
+import { adaptJsonFormatPlan } from '../../schema/adaptJsonFormatPlan';
 import { getAiConfig, hasAiProvider } from './aiConfig';
 import { runGeminiExtraction } from './providers/geminiProvider';
 import { runOpenAiExtraction } from './providers/openaiProvider';
@@ -326,15 +328,26 @@ function buildSystemInstruction() {
 }
 
 function buildPrompt(inputText) {
-  const schemaTemplate = buildSchemaTemplate();
   return [
-    'Convert user request into this exact JSON structure.',
-    'Do not omit keys.',
+    'Convert user request into this exact JSON structure and return only JSON.',
+    'Do not omit keys. Keep nulls/arrays when values are unknown.',
+    'Selected services must be represented under selectedPlan with enabled/selected entries where requested.',
+    'Recommendations must be present for each enabled service when possible.',
     'User request:',
     inputText,
     'Target schema template:',
-    JSON.stringify(schemaTemplate, null, 2)
+    JSON.stringify(jsonFormatTemplate, null, 2)
   ].join('\n\n');
+}
+
+function isJsonFormatShape(plan) {
+  return Boolean(
+    plan
+    && typeof plan === 'object'
+    && plan.requestMeta
+    && plan.servicesRequested
+    && plan.selectedPlan
+  );
 }
 
 function parseJsonSafely(rawText) {
@@ -390,7 +403,10 @@ export async function extractIntentSchemaFromText(inputText) {
         });
 
     const parsed = parseJsonSafely(rawResult);
-    const normalized = normalizePlan(parsed, normalizedInputText);
+    const convertedPlan = isJsonFormatShape(parsed)
+      ? adaptJsonFormatPlan(parsed, normalizedInputText)
+      : parsed;
+    const normalized = normalizePlan(convertedPlan, normalizedInputText);
     const repaired = enforceServiceCoverage(normalized, normalizedInputText);
     const finalPlan = normalizePlan(repaired, normalizedInputText);
 
