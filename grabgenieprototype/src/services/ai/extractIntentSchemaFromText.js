@@ -146,7 +146,7 @@ function ensureFoodDefaults(plan, text, currency) {
     plan.recommendations.food = [
       {
         recommendationId: 'food-rec-guardrail-1',
-        label: inferred.cuisine ? `${inferred.cuisine} Value Set` : 'Value Meal Set',
+        label: plan.selectedServices.food?.cuisine ? `${plan.selectedServices.food.cuisine} Value Set` : 'Value Meal Set',
         deltaPrice: -3,
         reason: 'Lower cost alternative while keeping similar food profile.',
         payload: {
@@ -180,7 +180,13 @@ function ensureRideDefaults(plan, text, currency) {
   const wantsFastest = /fastest|quickest|asap|urgent|priority/i.test(text);
   const toAirport = /airport/i.test(text);
 
-  const rideProduct = wantsPremium ? 'Premium Ride' : wantsFastest ? 'Priority Ride' : 'GrabCar';
+  let rideProductParts = [];
+  if (wantsFastest) rideProductParts.push('Priority');
+  if (wantsPremium) rideProductParts.push('Premium');
+  if (rideProductParts.length === 0) rideProductParts.push('GrabCar');
+  else rideProductParts.push('Ride');
+  
+  const rideProduct = rideProductParts.join(' ');
   const baseFare = budget ? Math.max(6, Math.round(budget * 0.28)) : wantsPremium ? 14 : 9;
 
   if (!plan.selectedServices.ride) {
@@ -194,18 +200,30 @@ function ensureRideDefaults(plan, text, currency) {
       pickupEtaMinutes: wantsFastest ? 2 : 6,
       scheduledAfterMinutes: delayMinutes,
       rationale: wantsFastest ? 'Matched fastest ride preference.' : 'Matched ride booking intent.',
-      tags: ['selected', wantsPremium ? 'premium' : 'balanced']
+      tags: ['selected', wantsPremium ? 'premium' : 'balanced'].filter(Boolean)
     };
   } else {
-    if (toAirport && !plan.selectedServices.ride.dropoffLabel) {
+    if (toAirport && (!plan.selectedServices.ride.dropoffLabel || plan.selectedServices.ride.dropoffLabel === 'Selected destination')) {
       plan.selectedServices.ride.dropoffLabel = 'Airport';
     }
-    if (wantsPremium && !/premium|luxury/i.test(plan.selectedServices.ride.product || '')) {
-      plan.selectedServices.ride.product = 'Premium Ride';
-      plan.selectedServices.ride.tags = Array.from(new Set([...(plan.selectedServices.ride.tags || []), 'premium']));
-    } else if (wantsFastest && !/priority|fast|premium/i.test(plan.selectedServices.ride.product || '')) {
-      plan.selectedServices.ride.product = 'Priority Ride';
-      plan.selectedServices.ride.tags = Array.from(new Set([...(plan.selectedServices.ride.tags || []), 'fast']));
+    const tags = new Set(plan.selectedServices.ride.tags || []);
+    if (wantsPremium) tags.add('premium');
+    if (wantsFastest) tags.add('fast');
+    plan.selectedServices.ride.tags = Array.from(tags);
+
+    const currentProduct = plan.selectedServices.ride.product || '';
+    const hasPremium = /premium|luxury/i.test(currentProduct) || wantsPremium;
+    const hasPriority = /priority|fast/i.test(currentProduct) || wantsFastest;
+    
+    let updatedProductParts = [];
+    if (hasPriority) updatedProductParts.push('Priority');
+    if (hasPremium) updatedProductParts.push('Premium');
+    
+    if (updatedProductParts.length > 0) {
+      updatedProductParts.push('Ride');
+      plan.selectedServices.ride.product = updatedProductParts.join(' ');
+    } else if (!currentProduct || currentProduct === 'Ride') {
+      plan.selectedServices.ride.product = 'GrabCar';
     }
   }
 
@@ -214,18 +232,21 @@ function ensureRideDefaults(plan, text, currency) {
       ? plan.selectedServices.ride.estimatedFare.amount
       : baseFare;
 
+    // ensure recommendations contrast with the potentially combined selection
+    const rec1Product = (wantsPremium && !wantsFastest) ? 'Premium Economy' : 'Priority Ride';
+
     plan.recommendations.ride = [
       {
         recommendationId: 'ride-rec-guardrail-1',
-        label: 'Priority Ride',
+        label: rec1Product,
         deltaPrice: 3,
-        reason: 'Faster pickup and better matching probability.',
+        reason: 'Faster pickup or alternate premium option.',
         payload: {
           ...plan.selectedServices.ride,
-          product: 'Priority Ride',
+          product: rec1Product,
           estimatedFare: { amount: selectedFare + 3, currency },
           pickupEtaMinutes: 2,
-          tags: ['recommended', 'fast']
+          tags: ['recommended', 'alternative']
         }
       },
       {
@@ -270,19 +291,33 @@ function enforceServiceCoverage(plan, inputText) {
     ...(hasRideSignal ? ['ride'] : [])
   ]));
 
-  const total = [
-    plan.selectedServices.food?.estimatedPrice?.amount,
-    plan.selectedServices.ride?.estimatedFare?.amount,
-    plan.selectedServices.mart?.estimatedPrice?.amount
-  ]
-    .filter((value) => typeof value === 'number')
-    .reduce((sum, value) => sum + value, 0);
+  const hasFood = plan.selectedServices.food != null;
+  const hasRide = plan.selectedServices.ride != null;
+  const hasMart = plan.selectedServices.mart != null;
 
-  if (total > 0) {
-    plan.orchestration.combinedCostEstimate = {
-      amount: total,
-      currency
-    };
+  const missingPrices = (hasFood && typeof plan.selectedServices.food?.estimatedPrice?.amount !== 'number') || 
+                        (hasRide && typeof plan.selectedServices.ride?.estimatedFare?.amount !== 'number') || 
+                        (hasMart && typeof plan.selectedServices.mart?.estimatedPrice?.amount !== 'number');
+
+  if (missingPrices) {
+    plan.orchestration.combinedCostEstimate = null;
+    plan.uiHints = plan.uiHints || {};
+    plan.uiHints.fallbackMessage = plan.uiHints.fallbackMessage || "Note: Total cost unavailable due to missing price estimates.";
+  } else {
+    const total = [
+      plan.selectedServices.food?.estimatedPrice?.amount,
+      plan.selectedServices.ride?.estimatedFare?.amount,
+      plan.selectedServices.mart?.estimatedPrice?.amount
+    ]
+      .filter((value) => typeof value === 'number')
+      .reduce((sum, value) => sum + value, 0);
+
+    if (total > 0) {
+      plan.orchestration.combinedCostEstimate = {
+        amount: total,
+        currency
+      };
+    }
   }
 
   return plan;
@@ -494,13 +529,20 @@ export async function extractIntentSchemaFromText(inputText) {
         });
 
     const parsed = parseJsonSafely(rawResult);
+    console.log('[GrabGenie][Debug] 1. Raw AI JSON:', JSON.stringify(parsed, null, 2));
+
     const convertedPlan = isJsonFormatShape(parsed)
       ? adaptJsonFormatPlan(parsed, normalizedInputText)
       : parsed;
+    
+    console.log('[GrabGenie][Debug] 2. After Adapter Plan:', JSON.stringify(convertedPlan, null, 2));
+
     const normalized = normalizePlan(convertedPlan, normalizedInputText);
     const repaired = enforceServiceCoverage(normalized, normalizedInputText);
     const finalPlan = normalizePlan(repaired, normalizedInputText);
 
+    console.log('[GrabGenie][Debug] 3. Final Rendered Selected Plan:', JSON.stringify(finalPlan.selectedServices, null, 2));
+    console.log('[GrabGenie][Debug] 4. Final Recommendations:', JSON.stringify(finalPlan.recommendations, null, 2));
     console.log('[GrabGenie][PlanJSON][ai]', JSON.stringify(buildDebugJson(finalPlan), null, 2));
 
     return {

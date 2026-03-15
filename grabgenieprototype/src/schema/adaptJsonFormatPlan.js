@@ -56,18 +56,21 @@ function toRecommendationId(prefix, index) {
 
 function mapFoodSelected(plan, currency) {
   const selected = pickFirstSelected(plan?.selectedPlan?.food);
-  if (!selected) {
+  const requested = plan?.servicesRequested?.food;
+  if (!selected && !requested?.enabled && !requested?.itemQuery) {
     return null;
   }
 
+  const itemName = selected?.item || requested?.itemQuery || null;
+
   return {
     category: 'food',
-    providerName: selected.restaurant || null,
-    itemName: selected.item || null,
-    cuisine: null,
-    quantity: typeof selected.quantity === 'number' ? selected.quantity : null,
-    estimatedPrice: toMoney(selected.price, currency),
-    etaMinutes: typeof selected.etaMinutes === 'number' ? selected.etaMinutes : null,
+    providerName: selected?.restaurant || null,
+    itemName,
+    cuisine: requested?.cuisine || null,
+    quantity: typeof selected?.quantity === 'number' ? selected.quantity : typeof requested?.peopleCount === 'number' ? requested.peopleCount : null,
+    estimatedPrice: toMoney(selected?.price, currency),
+    etaMinutes: typeof selected?.etaMinutes === 'number' ? selected.etaMinutes : null,
     rationale: null,
     tags: ['selected']
   };
@@ -76,7 +79,7 @@ function mapFoodSelected(plan, currency) {
 function mapRideSelected(plan, currency) {
   const selected = pickFirstSelected(plan?.selectedPlan?.ride);
   const requested = plan?.servicesRequested?.ride;
-  if (!selected && !requested) {
+  if (!selected && !requested?.enabled) {
     return null;
   }
 
@@ -85,9 +88,21 @@ function mapRideSelected(plan, currency) {
   const destLabel = toLocationLabel(selected?.destination, null)
     || toLocationLabel(requested?.destination, 'Selected destination');
 
+  let product = toRideProduct(selected);
+  let parts = [];
+  if (requested?.ridePreferences?.fastest || requested?.ridePreferences?.priority || /priority|fast/i.test(product || '')) parts.push('Priority');
+  if (requested?.ridePreferences?.premium || /premium|luxury/i.test(product || '')) parts.push('Premium');
+  
+  if (parts.length > 0) {
+    parts.push('Ride');
+    product = parts.join(' ');
+  } else if (!product || product === 'Ride' || product === 'GrabCar') {
+    product = requested?.ridePreferences?.vehicleClass || 'Ride';
+  }
+
   return {
     category: 'ride',
-    product: toRideProduct(selected) || requested?.ridePreferences?.vehicleClass || 'Ride',
+    product,
     pickupLabel,
     dropoffLabel: destLabel,
     seats: typeof requested?.ridePreferences?.seatCount === 'number' ? requested.ridePreferences.seatCount : 4,
@@ -95,7 +110,7 @@ function mapRideSelected(plan, currency) {
     pickupEtaMinutes: typeof selected?.etaMinutes === 'number' ? selected.etaMinutes : null,
     scheduledAfterMinutes: typeof plan?.constraints?.time?.relativeDelayMinutes === 'number'
       ? plan.constraints.time.relativeDelayMinutes
-      : null,
+      : typeof requested?.timing?.relativeDelayMinutes === 'number' ? requested.timing.relativeDelayMinutes : null,
     rationale: null,
     tags: [
       requested?.ridePreferences?.premium ? 'premium' : null,
