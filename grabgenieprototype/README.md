@@ -53,7 +53,7 @@ Example:
 ```
 REACT_APP_AI_PROVIDER=gemini
 REACT_APP_GEMINI_API_KEY=your_key_here
-REACT_APP_GEMINI_MODEL=gemini-1.5-flash
+REACT_APP_GEMINI_MODEL=gemini-2.5-flash
 ```
 
 Supported providers:
@@ -69,7 +69,7 @@ Supported providers:
 ```
 REACT_APP_AI_PROVIDER=gemini
 REACT_APP_GEMINI_API_KEY=your_gemini_api_key_here
-REACT_APP_GEMINI_MODEL=gemini-1.5-flash
+REACT_APP_GEMINI_MODEL=gemini-2.5-flash
 ```
 
 2. Restart dev server after env changes (`npm start` again).
