@@ -58,7 +58,7 @@ function HomeScreen({ onGenieClick, hasOrdered, activity }) {
         </>
       )}
 
-      <div className="promo-banner">
+      <div className="promo-banner" onClick={onGenieClick} style={{ cursor: 'pointer' }}>
         <div className="promo-text">
           <div className="promo-title">Try Grab Genie</div>
           <div className="promo-sub">One request. Multi-service orchestration.</div>
