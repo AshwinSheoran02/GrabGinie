@@ -42,9 +42,7 @@ async function requestWithModel({ apiKey, model, systemInstruction, userPrompt }
 export async function runGeminiExtraction({ apiKey, model, systemInstruction, userPrompt }) {
   const candidates = Array.from(new Set([
     model,
-    'gemini-2.0-flash',
-    'gemini-2.0-flash-lite',
-    'gemini-1.5-flash-8b'
+    'gemini-2.5-flash'
   ].filter(Boolean)));
 
   let lastError = null;
