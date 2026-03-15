@@ -62,6 +62,29 @@ Supported providers:
 - `openai`
 - `none` (automatic local fallback planner)
 
+### Local AI Setup (Gemini)
+
+1. Create/update `.env.local` in `grabgenieprototype/`:
+
+```
+REACT_APP_AI_PROVIDER=gemini
+REACT_APP_GEMINI_API_KEY=your_gemini_api_key_here
+REACT_APP_GEMINI_MODEL=gemini-1.5-flash
+```
+
+2. Restart dev server after env changes (`npm start` again).
+3. In assistant screen, confirm status line shows `AI extraction active (gemini)`.
+
+### GitHub Pages AI Setup (Required)
+
+GitHub Pages uses GitHub Actions build-time env vars, not your local `.env.local`.
+
+1. Open repository `Settings -> Secrets and variables -> Actions`.
+2. Add repository secret:
+	- `REACT_APP_GEMINI_API_KEY` = your Gemini key
+3. Re-run workflow `Deploy GrabGenie Prototype to GitHub Pages` or push a new commit.
+4. Open deployed URL and verify assistant status line shows AI active.
+
 Security note:
 
 - Never commit real API keys.
