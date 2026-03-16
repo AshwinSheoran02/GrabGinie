@@ -4,20 +4,19 @@ This app is the first real interactive version of Grab Genie, aligned to the vis
 
 ## Live URL
 
-- https://ashwinsheoran02.github.io/GrabGinie/
+👉 **[Launch Grab Genie Application](https://ashwinsheoran02.github.io/GrabGinie/)** 👈
 
-## How To Use (Quick)
+## How To Use
 
-1. Open the app home screen and tap the Grab Genie FAB.
-2. Enter a natural-language request in the text box, or tap Voice Mode.
+1. Open the **[Live URL](https://ashwinsheoran02.github.io/GrabGinie/)** and tap the **Try Grab Genie** banner or the bottom FAB.
+2. Enter a natural-language request like *"I want chocolate ice cream and get me a ride to the airport"*, or tap **Voice Mode**.
 3. For voice:
-	- first mic tap starts recording
-	- second mic tap stops recording and sends transcription for planning
-4. Wait for processing, then review Selected for you + Recommended Alternatives.
-5. Tap Replace on recommendations to swap into selected cards.
-6. Tap Confirm All to complete and return to Home with recent activity.
-
-## AI vs Fallback Behavior
+   - First mic tap starts recording.
+   - Second mic tap stops recording and sends transcription for planning.
+4. Wait for processing (AI parses intent directly to Grab services).
+5. Review **Selected for you** + **Recommended Alternatives**.
+6. Tap **Replace** on recommendations to instantly swap items.
+7. Tap **Confirm All** to return to Home and view activity.
 
 - If `REACT_APP_AI_PROVIDER` and API key are configured, extraction uses live AI provider calls.
 - If AI is unavailable or fails, the app automatically uses robust local fallback planning.
@@ -107,10 +106,11 @@ Security note:
 
 ## Technical Notes
 
-- UI flow state machine is in `src/hooks/useGrabGenie.js`.
-- AI extraction orchestration is in `src/services/ai/extractIntentSchemaFromText.js`.
-- Voice transcription session wrapper (browser speech-to-text) is in `src/services/audio/transcribeAudio.js`.
-- Rendering models are derived by category service engines in `src/serviceEngines/`.
+- **UX Flow Handling**: State machine orchestration via `src/hooks/useGrabGenie.js`.
+- **AI Brain**: AI extraction runs in `src/services/ai/extractIntentSchemaFromText.js`, utilizing **Gemini 1.5 Flash 8B** (for exceptionally low 1-2s latency intent parsing).
+- **Prompt Architecture**: We use a dynamic JSON Schema matching strict user intents, preserving exact specificity (e.g. "Chocolate ice cream" over generalized categories) in `src/schema/adaptJsonFormatPlan.js`.
+- **Data Rendering**: Visual models are calculated locally by category service engines located in `src/serviceEngines/`.
+- **Speech-to-Text**: Audio handling currently wrappers the browser's native `window.SpeechRecognition` Web Speech API (`src/services/audio/transcribeAudio.js`). *(Note: On Android mobile, native STT drops text quality compared to APIs like OpenAI Whisper).*
 - Plan schema template/normalization lives in `src/schema/planSchema.js`.
 
 ## GitHub Pages Deployment (From Parent GrabGinie Repo)
