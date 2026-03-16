@@ -45,7 +45,7 @@
         .glow-2 { background: rgba(59, 130, 246, 0.08); width: 600px; height: 600px; bottom: -100px; left: -100px; }
 
         /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; height: 100px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; min-height: 100px; }
         .header h1 { font-size: 64px; font-weight: 900; color: var(--text-main); letter-spacing: -2px; }
         .header h1 span { color: var(--grab-green); }
         .tagline { font-size: 28px; font-weight: 600; color: var(--text-sub); margin-top: 5px; }
@@ -173,8 +173,14 @@
             <div>
                 <h1>Grab <span>Genie</span></h1>
                 <div class="tagline">AI Agent for Multi-Service Intent Orchestration</div>
+                <div style="display: flex; gap: 24px; align-items: center; margin-top: 18px;">
+                    <span style="font-size: 20px; font-weight: 700; color: var(--text-main); background: #E2E8F0; padding: 6px 14px; border-radius: 8px;">Team Token Tribe</span>
+                    <span style="font-size: 18px; color: var(--text-sub); font-weight: 500;">Ashwin Sheoran &nbsp;·&nbsp; Akshay Bhardwaj &nbsp;·&nbsp; Shreyanshu Sharma</span>
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #CBD5E1;"></span>
+                    <span style="font-size: 18px; color: var(--grab-green); font-weight: 700;">Building New Generative Service Offerings (Fintech)</span>
+                </div>
             </div>
-            <div class="badge">Hackathon 2.0</div>
+            <div class="badge" style="align-self: flex-start; margin-top: 10px;">GrabHack 2.0</div>
         </div>
 
         <div class="grid-2">
@@ -241,7 +247,7 @@
                 <h1>Under the <span>Engine</span></h1>
                 <div class="tagline">System Architecture, Reasoning & Impact</div>
             </div>
-            <div class="badge">Hackathon 2.0</div>
+            <div class="badge" style="align-self: flex-start; margin-top: 10px;">GrabHack 2.0</div>
         </div>
 
         <!-- Sleek Horizontal Pipeline (~180px height) -->
