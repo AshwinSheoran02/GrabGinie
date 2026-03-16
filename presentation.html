@@ -5,532 +5,383 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grab Genie - Hackathon Presentation</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        
         :root {
             --grab-green: #00B14F;
-            --light-green: #DFF5E8;
-            --dark-gray: #1F2933;
-            --white: #FFFFFF;
-            --off-white: #F8F9FA;
-            --border-color: #E2E8F0;
+            --dark-bg: #0B101E; /* Deeper tech dark */
+            --card-dark: #161D2D;
+            --text-gray: #94A3B8;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
         body {
-            background-color: #e5e5e5;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 40px;
-            gap: 40px;
+            background-color: var(--dark-bg);
+            display: flex; flex-direction: column; align-items: center; padding: 40px; gap: 60px;
         }
 
+        /* Enforce absolute scale so there's never an overflow within the 16:9 canvas */
         .slide {
+            width: 1920px; height: 1080px;
+            background: #FFFFFF; border-radius: 32px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+            position: relative; overflow: hidden; display: flex; flex-direction: column;
+            flex-shrink: 0;
+            /* Added smooth scaling logic for smaller preview windows if needed */
+            max-width: 100%; height: auto; aspect-ratio: 16/9;
+        }
+
+        .slide.dark-slide {
+            background: var(--dark-bg);
+            color: #FFFFFF;
+        }
+
+        /* Abstract glowing background effects (Glassmorphism vibes) */
+        .glow { position: absolute; border-radius: 50%; filter: blur(200px); pointer-events: none;}
+        .slide:not(.dark-slide) .glow-green { background: rgba(0, 177, 79, 0.15); width: 800px; height: 800px; top: -200px; right: -200px; }
+        .slide:not(.dark-slide) .glow-blue { background: rgba(59, 130, 246, 0.08); width: 600px; height: 600px; bottom: -100px; left: -100px; }
+        
+        .dark-slide .glow-green { background: rgba(0, 177, 79, 0.2); width: 800px; height: 800px; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.5; }
+
+        /* The canvas inside the slide */
+        .content {
+            position: relative; z-index: 10; padding: 80px 100px; height: 1080px; display: flex; flex-direction: column; 
             width: 1920px;
-            height: 1080px;
-            background-color: var(--white);
-            border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-            position: relative;
-            transform-origin: top center;
-            /* Scale down for smaller screens but keep aspect ratio */
-            max-width: 100%;
-            height: auto;
-            aspect-ratio: 16/9;
-            display: flex;
-            flex-direction: column;
-            padding: 80px 100px;
         }
 
-        /* Header Styles */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 60px;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 30px;
-        }
-
-        .header h1 {
-            color: var(--dark-gray);
-            font-size: 56px;
-            font-weight: 800;
-            letter-spacing: -1px;
-        }
-
+        /* Header Engine */
+        .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 60px; }
+        .header h1 { font-size: 64px; font-weight: 900; letter-spacing: -2px; }
+        .slide:not(.dark-slide) .header h1 { color: #0F172A; }
+        .dark-slide .header h1 { color: #FFFFFF; }
+        
         .header h1 span {
-            color: var(--grab-green);
+            background: linear-gradient(135deg, #00B14F 0%, #008f3f 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        
+        .tagline { font-size: 28px; font-weight: 500; margin-top: 12px; }
+        .slide:not(.dark-slide) .tagline { color: #64748B; }
+        .dark-slide .tagline { color: var(--text-gray); }
+
+        .badge {
+            background: rgba(0, 177, 79, 0.1); color: var(--grab-green); border: 1px solid rgba(0, 177, 79, 0.3);
+            padding: 12px 24px; border-radius: 100px; font-size: 20px; font-weight: 700;
+        }
+        .dark-slide .badge-dark {
+            background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);
         }
 
-        .tagline {
-            font-size: 28px;
-            color: #64748B;
-            font-weight: 500;
-            margin-top: 10px;
+        /* Grid Frameworks */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; flex: 1; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; flex: 1; align-items: stretch; }
+        
+        /* Premium Card Layouts */
+        .premium-card {
+            background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px); border-radius: 32px; padding: 50px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.04); display: flex; flex-direction: column;
         }
-
-        .grab-logo {
-            font-size: 36px;
-            font-weight: 900;
-            color: var(--grab-green);
-            letter-spacing: -2px;
+        .dark-slide .premium-card {
+            background: var(--card-dark); border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
-
-        /* Base Grid Layouts */
-        .grid-2-col {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 60px;
-            flex: 1;
-        }
-
-        .grid-3-col {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 40px;
-            flex: 1;
-        }
-
-        /* Card Styles */
-        .card {
-            background: var(--off-white);
-            border-radius: 20px;
-            padding: 40px;
-            border: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-        }
-
+        
         .card-green {
-            background: var(--light-green);
-            border-color: var(--grab-green);
+            background: linear-gradient(135deg, #00B14F 0%, #008F3F 100%); color: white;
+            border-radius: 32px; padding: 50px; box-shadow: 0 30px 50px rgba(0, 177, 79, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex; flex-direction: column; position: relative; overflow: hidden;
         }
 
-        .card-title {
-            font-size: 28px;
-            color: var(--dark-gray);
-            font-weight: 700;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        /* Text Context inside Cards */
+        .card-title { font-size: 36px; font-weight: 800; display: flex; align-items: center; gap: 20px; margin-bottom: 30px; letter-spacing: -1px; }
+        .icon-box {
+            width: 64px; height: 64px; border-radius: 16px; background: rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; font-size: 32px; flex-shrink: 0;
+        }
+        .card-green .icon-box { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); }
+        .dark-slide .icon-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+
+        p.big-text { font-size: 26px; line-height: 1.6; color: #334155; }
+        .card-green p.big-text { color: rgba(255,255,255,0.9); }
+        .dark-slide p.big-text { color: var(--text-gray); }
+
+        /* Emulated Apple UI Chat Bubble */
+        .hero-bubble {
+            background: #FFFFFF; border-radius: 32px 32px 32px 8px; padding: 40px;
+            font-size: 34px; font-weight: 600; color: #0F172A; line-height: 1.4;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.08); position: relative;
+            border: 1px solid rgba(0,0,0,0.05); border-left: 10px solid var(--grab-green); margin-top: 30px;
+        }
+        .hero-bubble::after {
+            content: ''; position: absolute; left: -10px; bottom: 0; width: 0; height: 0;
+            border-bottom: 25px solid var(--grab-green); border-left: 25px solid transparent;
         }
 
-        .card-title .icon {
-            font-size: 32px;
-            background: var(--grab-green);
-            color: var(--white);
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* Feat List Arrays */
+        .feat-list { display: flex; flex-direction: column; gap: 24px; margin-top: auto; }
+        .feat-item {
+            background: rgba(255,255,255,0.1); border-radius: 20px; padding: 24px;
+            display: flex; align-items: center; gap: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
+        .feat-text h4 { font-size: 24px; font-weight: 700; color: white; margin-bottom: 6px; }
+        .feat-text p { font-size: 18px; color: rgba(255,255,255,0.8); }
 
-        .card-title.dark .icon {
-            background: var(--dark-gray);
+        /* Horizontal Flow Design (Solves Cutoff issue from V1) */
+        .horiz-flow {
+            display: flex; align-items: center; justify-content: space-between; background: var(--card-dark);
+            padding: 40px 50px; border-radius: 32px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 50px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
         }
-
-        .text-body {
-            font-size: 22px;
-            color: #475569;
-            line-height: 1.6;
-        }
-
-        ul {
-            list-style: none;
-        }
-
-        ul li {
-            font-size: 22px;
-            color: #475569;
-            margin-bottom: 16px;
-            padding-left: 30px;
-            position: relative;
-        }
-
-        ul li::before {
-            content: "•";
-            color: var(--grab-green);
-            font-weight: bold;
-            font-size: 30px;
-            position: absolute;
-            left: 0;
-            top: -4px;
-        }
-
-        /* Specific Visual Elements */
-        .chat-bubble {
-            background: var(--white);
-            border-radius: 24px 24px 24px 0;
-            padding: 30px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            font-size: 32px;
-            font-weight: 600;
-            color: var(--dark-gray);
-            border-left: 6px solid var(--grab-green);
-            margin: 20px 0 40px 0;
-            line-height: 1.4;
-        }
-
-        .flow-diagram {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: var(--white);
-            border-radius: 16px;
-            padding: 30px;
-            margin-top: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-
-        .flow-nodes {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            width: 100%;
-        }
-
         .flow-node {
-            background: var(--off-white);
-            border: 2px solid var(--border-color);
-            padding: 15px 25px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 20px;
-            color: var(--dark-gray);
-            flex: 1;
-            text-align: center;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            padding: 20px; border-radius: 20px; font-size: 22px; font-weight: 700; color: white;
+            text-align: center; display: flex; flex-direction: column; gap: 12px; align-items: center; min-width: 200px;
         }
-
-        .flow-node.active {
-            background: var(--grab-green);
-            color: var(--white);
-            border-color: var(--grab-green);
+        .flow-node.highlight {
+            background: rgba(0, 177, 79, 0.15); border-color: var(--grab-green); color: #00B14F;
+            box-shadow: 0 0 30px rgba(0, 177, 79, 0.2);
         }
-
-        .arrow {
-            color: #CBD5E1;
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        /* Diagram - Vert / Horiz */
-        .vertical-flow {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .v-arrow {
-            color: var(--grab-green);
-            font-size: 24px;
-        }
-
-        .arch-node {
-            background: var(--white);
-            border: 2px solid var(--border-color);
-            padding: 20px;
-            border-radius: 16px;
-            width: 100%;
-            text-align: center;
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--dark-gray);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
-            position: relative;
-        }
-
-        .arch-node.sub {
-            display: flex;
-            gap: 10px;
-            background: transparent;
-            border: none;
-            box-shadow: none;
-            padding: 0;
-        }
-
-        .arch-node.sub > div {
-            flex: 1;
-            background: var(--off-white);
-            border: 2px solid var(--border-color);
-            padding: 15px;
-            border-radius: 12px;
-            font-size: 18px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .arch-node.highlight {
-            background: var(--light-green);
-            border-color: var(--grab-green);
-            color: var(--grab-green);
-        }
-
-        /* Reasoning Step Grid */
-        .step-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 20px;
-        }
+        .flow-arrow { font-size: 24px; color: var(--grab-green); font-weight: 900; opacity: 0.6; }
         
-        .step-row {
-            display: flex;
-            align-items: center;
-            background: var(--white);
-            padding: 15px 25px;
-            border-radius: 12px;
-            border-left: 4px solid var(--grab-green);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        .services-stack { display: flex; flex-direction: column; gap: 12px; width: 220px; }
+        .service-pill { 
+            background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; font-size: 18px; 
+            display: flex; align-items: center; justify-content: center; gap: 10px; border: 1px solid rgba(255,255,255,0.05);
+            font-weight: 600; color: white;
         }
 
-        .step-num {
-            font-weight: 800;
-            color: var(--grab-green);
-            font-size: 24px;
-            margin-right: 20px;
-            min-width: 80px;
+        /* Sequence Steps */
+        .step-row { display: flex; gap: 20px; margin-bottom: 30px; align-items: flex-start; }
+        .step-num { 
+            background: var(--grab-green); color: white; width: 44px; height: 44px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 20px; flex-shrink: 0;
+            box-shadow: 0 5px 15px rgba(0, 177, 79, 0.4);
         }
-
-        .step-desc {
-            font-size: 20px;
-            color: var(--dark-gray);
-            font-weight: 600;
-        }
-
-        .impact-stats {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 30px;
-        }
-
-        .stat-badge {
-            text-align: center;
-            background: var(--white);
-            padding: 20px 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-
-        .stat-value {
-            font-size: 36px;
-            font-weight: 800;
-            color: var(--grab-green);
-        }
-
-        .stat-label {
-            font-size: 18px;
-            color: #64748B;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 5px;
-        }
+        .step-desc h4 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: white; }
+        .step-desc p { font-size: 18px; color: var(--text-gray); line-height: 1.5; }
         
-        /* Spark Decorator */
-        .sparkle-icon {
-            position: absolute;
-            top: 60px;
-            right: 80px;
-            color: var(--grab-green);
-            opacity: 0.2;
-        }
+        /* Checkmarks Grid */
+        .check-item { display: flex; align-items: center; gap: 16px; margin-bottom: 25px; background: rgba(255,255,255,0.03); padding: 15px 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.02);}
+        .check-icon { color: var(--grab-green); font-size: 24px; background: rgba(0, 177, 79, 0.2); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px;}
+        .check-item p { font-size: 20px; font-weight: 600; color: white; }
+        
+        /* Large Metrics */
+        .stat-box { text-align: center; margin-bottom: 40px; }
+        .stat-val { font-size: 80px; font-weight: 900; color: var(--grab-green); line-height: 1; margin-bottom: 10px; letter-spacing: -2px;}
+        .stat-label { font-size: 22px; font-weight: 600; color: var(--text-gray); }
+
     </style>
 </head>
 <body>
 
-    <!-- SLIDE 1 -->
+    <!-- SLIDE 1 (Stripe/Apple Style Light View) -->
     <div class="slide">
-        <!-- Sparkle BG Art -->
-        <svg class="sparkle-icon" width="200" height="200" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/>
-        </svg>
-
-        <div class="header">
-            <div>
-                <h1>Grab <span>Genie</span></h1>
-                <div class="tagline">AI Agent for Multi-Service Intent Orchestration</div>
+        <!-- Scale Wrapper prevents any cutoff by enforcing exact aspect ratio limits -->
+        <div class="glow glow-green"></div>
+        <div class="glow glow-blue"></div>
+        <div class="content">
+            
+            <div class="header">
+                <div class="header-left">
+                    <h1>Grab <span>Genie</span></h1>
+                    <div class="tagline">AI Agent for Multi-Service Intent Orchestration</div>
+                </div>
+                <div class="badge">GrabHack 2.0</div>
             </div>
-            <div class="grab-logo">GrabHack 2.0</div>
-        </div>
 
-        <div class="grid-2-col">
-            <!-- Left Column: The Problem & Request -->
-            <div style="display: flex; flex-direction: column; gap: 30px;">
-                <div class="card">
+            <div class="grid-2">
+                <!-- Left Content -->
+                <div style="display: flex; flex-direction: column; gap: 40px; justify-content: center;">
+                    <div class="premium-card" style="margin-top: 10px;">
+                        <div class="card-title">
+                            <div class="icon-box" style="background:#FFE4E6; color:#EF4444;">⚠️</div>
+                            The Friction
+                        </div>
+                        <p class="big-text">
+                            Super-apps possess immense utility, but currently trap users in <strong>disconnected vertical silos</strong> (Food, Ride, Mart). Multi-tasking relies exclusively on manual, transaction-heavy GUI flows.
+                        </p>
+                    </div>
+
+                    <div style="padding-left: 20px;">
+                        <h3 style="font-size: 22px; color: #64748B; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;">One Natural Request:</h3>
+                        <div class="hero-bubble">
+                            "Chocolate ice cream for me and a priority premium ride to the airport."
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Content -->
+                <div class="card-green">
                     <div class="card-title">
-                        <span class="icon" style="background:#EF4444;">⚠️</span> 
-                        The Problem
+                        <div class="icon-box">✨</div>
+                        The Solution Core
                     </div>
-                    <div class="text-body">
-                        Super-apps contain immense utility but require users to navigate across <strong>disconnected vertical silos</strong> (Food, Ride, Mart) to complete composite tasks. Discoverability relies on manual transaction flows.
-                    </div>
-                </div>
+                    <p class="big-text" style="margin-bottom: 50px;">
+                        An intelligent orchestration layer utilizing Gemini AI to transform everyday natural language instantly into a structured, combined multi-service schema.
+                    </p>
 
-                <div>
-                    <h3 style="font-size: 24px; color: var(--dark-gray); margin-bottom: 10px; font-weight: 700;">Example Natural Request:</h3>
-                    <div class="chat-bubble">
-                        "Chocolate ice cream for me and a priority premium ride to the airport."
+                    <div class="feat-list">
+                        <div class="feat-item">
+                            <div class="icon-box" style="font-size: 26px;">🔗</div>
+                            <div class="feat-text">
+                                <h4>Cross-Service Orchestration</h4>
+                                <p>Combines Ride, Food, and Mart items concurrently.</p>
+                            </div>
+                        </div>
+                        <div class="feat-item">
+                            <div class="icon-box" style="font-size: 26px;">🧠</div>
+                            <div class="feat-text">
+                                <h4>Contextual AI Reasoning</h4>
+                                <p>Infers entity parameters (matching "airport" to Ride tool).</p>
+                            </div>
+                        </div>
+                        <div class="feat-item">
+                            <div class="icon-box" style="font-size: 26px;">⚡</div>
+                            <div class="feat-text">
+                                <h4>Seamless Cart Confirmation</h4>
+                                <p>Review the entire multi-intent plan in one holistic view.</p>
+                            </div>
+                        </div>
                     </div>
-                </div>
-
-                <div class="flow-diagram">
-                    <h4 style="font-size: 16px; color: #64748B; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px;">One Request → One Intelligent Plan</h4>
-                    <div class="flow-nodes">
-                        <div class="flow-node">Voice / Text</div>
-                        <div class="arrow">→</div>
-                        <div class="flow-node active">Grab Genie</div>
-                        <div class="arrow">→</div>
-                        <div class="flow-node">Orchestrated Cart</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Column: Solution & Capabilities -->
-            <div style="display: flex; flex-direction: column; gap: 30px;">
-                <div class="card card-green" style="height: 100%;">
-                    <div class="card-title">
-                        <span class="icon">✨</span> 
-                        The Solution
-                    </div>
-                    <div class="text-body" style="margin-bottom: 40px;">
-                        An intelligent orchestrator that transforms natural language into a structured, multi-service plan. It bridges the gap between user intent and Grab's expansive service ecosystem.
-                    </div>
-
-                    <div class="card-title dark" style="margin-top: auto;">
-                        <span class="icon">🚀</span> 
-                        Key Capabilities
-                    </div>
-                    <ul>
-                        <li><strong>Cross-Service Orchestration:</strong> Combines Ride, Food, and Mart items simultaneously.</li>
-                        <li><strong>Contextual AI Reasoning:</strong> Powered by Gemini to infer default constraints (e.g. matching "airport" to a Ride intent).</li>
-                        <li><strong>Proactive Alternatives:</strong> Generates smart fallback recommendations directly on the UI.</li>
-                        <li><strong>Seamless Confirmation:</strong> Review the entire multi-service plan in one holistic view.</li>
-                    </ul>
                 </div>
             </div>
+
         </div>
     </div>
 
 
-    <!-- SLIDE 2 -->
-    <div class="slide">
-        <svg class="sparkle-icon" width="200" height="200" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/>
-        </svg>
-
-        <div class="header">
-            <div>
-                <h1>How Grab Genie <span>Works</span></h1>
-                <div class="tagline">Architecture, Reasoning & Impact</div>
-            </div>
-            <div class="grab-logo">GrabHack 2.0</div>
-        </div>
-
-        <div class="grid-3-col">
-            <!-- Col 1: Architecture Diagram -->
-            <div class="card" style="grid-column: span 1;">
-                <div class="card-title">
-                    <span class="icon">⚙️</span>
-                    Architecture
+    <!-- SLIDE 2 (Premium Dark Mode Tech Vibe) -->
+    <div class="slide dark-slide">
+        <div class="glow glow-green"></div>
+        <div class="content">
+            
+            <div class="header">
+                <div class="header-left">
+                    <h1>Under the <span>Hood</span></h1>
+                    <div class="tagline">Agent Architecture, Intelligent Reasoning & Impact</div>
                 </div>
-                <div class="vertical-flow" style="margin-top: 20px;">
-                    <div class="arch-node">User Input</div>
-                    <div class="v-arrow">↓</div>
-                    <div class="arch-node highlight">Gemini AI (LLM)</div>
-                    <div class="v-arrow">↓</div>
-                    <div class="arch-node">Intent JSON</div>
-                    <div class="v-arrow">↓</div>
-                    <div class="arch-node">Service Planner</div>
-                    <div class="v-arrow">↓</div>
-                    <div class="arch-node sub">
-                        <div>🍦 Food</div>
-                        <div>🚗 Ride</div>
-                        <div>🛍️ Mart</div>
-                    </div>
-                    <div class="v-arrow">↓</div>
-                    <div class="arch-node">User Confirmation</div>
-                </div>
+                <div class="badge badge-dark">GrabHack 2.0</div>
             </div>
 
-            <!-- Col 2: Reasoning Flow & Guardrails -->
-            <div style="grid-column: span 2; display: flex; flex-direction: column; gap: 30px;">
-                <div class="card card-green">
-                    <div class="card-title">
-                        <span class="icon">🧠</span>
-                        Reasoning Flow
-                    </div>
-                    <div class="text-body" style="font-weight: 600; color: var(--grab-green); margin-bottom: 10px;">
-                        Trigger: "Chocolate ice cream + premium ride"
-                    </div>
-                    
-                    <div class="step-grid">
-                        <div class="step-row">
-                            <div class="step-num">Step 1</div>
-                            <div class="step-desc">Intent Detection (Distinguish Food vs. Ride items)</div>
-                        </div>
-                        <div class="step-row">
-                            <div class="step-num">Step 2</div>
-                            <div class="step-desc">Service Mapping (Map attributes to internal APIs)</div>
-                        </div>
-                        <div class="step-row">
-                            <div class="step-num">Step 3</div>
-                            <div class="step-desc">Plan Generation (Build combined cart schema)</div>
-                        </div>
-                        <div class="step-row">
-                            <div class="step-num">Step 4</div>
-                            <div class="step-desc">Recommendations (Look up contextual alternatives)</div>
-                        </div>
-                    </div>
+            <!-- Horizontal Architecture Flow (Fixes V1 Cut-off) -->
+            <div class="horiz-flow">
+                <div class="flow-node">
+                    <span style="font-size: 34px;">🎙️</span>
+                    User Input
                 </div>
+                
+                <div class="flow-arrow">━━━━▶</div>
+                
+                <div class="flow-node highlight">
+                    <span style="font-size: 34px;">🧠</span>
+                    Gemini AI Model
+                </div>
+                
+                <div class="flow-arrow">━━━━▶</div>
+                
+                <div class="flow-node">
+                    <span style="font-size: 34px;">📋</span>
+                    Intent JSON Extractor
+                </div>
+                
+                <div class="flow-arrow">━━━━▶</div>
+                
+                <div class="flow-node">
+                    <span style="font-size: 34px;">⚙️</span>
+                    Orchestrator Engine
+                </div>
+                
+                <div class="flow-arrow">━━━━▶</div>
+                
+                <div class="services-stack">
+                    <div class="service-pill">🍦 Food Target</div>
+                    <div class="service-pill">🚗 Ride Target</div>
+                    <div class="service-pill">🛍️ Mart Target</div>
+                </div>
+            </div>
 
-                <div class="grid-2-col" style="gap: 30px;">
-                    <div class="card">
-                        <div class="card-title dark">
-                            <span class="icon">🛡️</span>
-                            Guardrails
-                        </div>
-                        <ul>
-                            <li><strong>Strict JSON Schema:</strong> Output is enforced programmatically.</li>
-                            <li><strong>Validation Layer:</strong> Fallback parser kicks in if AI response drops mandatory schema context.</li>
-                            <li><strong>Prevents Hallucination:</strong> Exact text matching blocks non-existent feature injection.</li>
-                        </ul>
+            <!-- Bottom Three-Column Grid -->
+            <div class="grid-3">
+                
+                <!-- 1: Reasoning Flow -->
+                <div class="premium-card">
+                    <div class="card-title" style="font-size: 28px; margin-bottom: 25px;">
+                        <div class="icon-box" style="width: 50px; height: 50px; font-size: 24px;">⚡</div>
+                        Reasoning Pipeline
                     </div>
-
-                    <div class="card">
-                        <div class="card-title dark">
-                            <span class="icon">📈</span>
-                            The Impact
-                        </div>
-                        <div class="impact-stats">
-                            <div class="stat-badge">
-                                <div class="stat-value">UX</div>
-                                <div class="stat-label">Faster Completion</div>
-                            </div>
-                            <div class="stat-badge">
-                                <div class="stat-value">Platform</div>
-                                <div class="stat-label">AI Super-App</div>
+                    <div style="margin-top: 10px;">
+                        <div class="step-row">
+                            <div class="step-num">1</div>
+                            <div class="step-desc">
+                                <h4>Intent Segregation</h4>
+                                <p>Breaks compound request into separate Food & Ride entities.</p>
                             </div>
                         </div>
-                        <div class="text-body" style="margin-top: 20px; text-align: center; font-size: 18px;">
-                            Evolving from a transaction-driven UI to a truly intent-driven intelligent companion.
+                        <div class="step-row">
+                            <div class="step-num">2</div>
+                            <div class="step-desc">
+                                <h4>Service Mapping</h4>
+                                <p>Structures descriptive intent strictly to Grab API parameters.</p>
+                            </div>
+                        </div>
+                        <div class="step-row" style="margin-bottom: 0;">
+                            <div class="step-num">3</div>
+                            <div class="step-desc">
+                                <h4>Plan Extrapolation</h4>
+                                <p>Generates active cart items and contextual alternatives.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
+                <!-- 2: Guardrails -->
+                <div class="premium-card">
+                    <div class="card-title" style="font-size: 28px; margin-bottom: 25px;">
+                        <div class="icon-box" style="width: 50px; height: 50px; font-size: 24px;">🛡️</div>
+                        Security Protocol
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <div class="check-item">
+                            <div class="check-icon">✓</div>
+                            <p>Strict Schema Enforcement</p>
+                        </div>
+                        <div class="check-item">
+                            <div class="check-icon">✓</div>
+                            <p>Rigid Validation Layer</p>
+                        </div>
+                        <div class="check-item">
+                            <div class="check-icon">✓</div>
+                            <p>Anti-Hallucination Framing</p>
+                        </div>
+                        <div class="check-item" style="margin-bottom: 0;">
+                            <div class="check-icon">✓</div>
+                            <p>Local Parsing Resilience</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3: Impact Stats -->
+                <div class="premium-card">
+                    <div class="card-title" style="font-size: 28px; margin-bottom: 25px;">
+                        <div class="icon-box" style="width: 50px; height: 50px; font-size: 24px;">🚀</div>
+                        Strategic Impact
+                    </div>
+                    <div style="display: flex; flex-direction: column; justify-content: center; flex: 1; align-items: center; padding-top: 10px;">
+                        <div class="stat-box" style="margin-bottom: 50px;">
+                            <div class="stat-val">10x</div>
+                            <div class="stat-label">Faster Goal Completion</div>
+                        </div>
+                        <div class="stat-box" style="margin-bottom: 0;">
+                            <div class="stat-val" style="font-size: 48px; line-height: 1.1; margin-bottom: 15px; background: linear-gradient(135deg, #00B14F 0%, #008f3f 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">True Super-App</div>
+                            <div class="stat-label">From Transactional GUI <br> to Intelligent Companion</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 
