@@ -30,8 +30,9 @@ const fs = require('fs');
   const pptx = new PptxGenJS();
   pptx.layout = 'LAYOUT_16x9';
 
-  // We have 5 slides
-  const slidesCount = 5;
+  // Get dynamic slides count
+  const slidesCount = await page.evaluate(() => document.querySelectorAll('.slide').length);
+  console.log(`Found ${slidesCount} slides to capture.`);
 
   for (let i = 0; i < slidesCount; i++) {
     console.log(`Capturing slide ${i + 1}...`);
