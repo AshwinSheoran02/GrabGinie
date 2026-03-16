@@ -45,7 +45,7 @@
         .glow-2 { background: rgba(59, 130, 246, 0.08); width: 600px; height: 600px; bottom: -100px; left: -100px; }
 
         /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; min-height: 100px; }
+        .header { display: flex;  align-items: center; margin-bottom: 40px; min-height: 100px; }
         .header h1 { font-size: 64px; font-weight: 900; color: var(--text-main); letter-spacing: -2px; }
         .header h1 span { color: var(--grab-green); }
         .tagline { font-size: 28px; font-weight: 600; color: var(--text-sub); margin-top: 5px; }
@@ -106,7 +106,7 @@
 
         /* SLIDE 2 PIPELINE (Sleek Horizontal Tech flow perfectly bounded) */
         .pipeline {
-            display: flex; align-items: stretch; justify-content: space-between; gap: 15px;
+            display: flex; align-items: stretch;  gap: 15px;
             background: var(--card-bg); padding: 30px 40px; border-radius: 32px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.03); border: 1px solid var(--border-color);
             margin-bottom: 40px; height: 180px; flex-shrink: 0;
@@ -185,7 +185,7 @@
 
         <div class="grid-2">
             <!-- Problem Context -->
-            <div class="card" style="justify-content: space-between;">
+            <div class="card" style="justify-content: flex-start; gap: 40px;">
                 <div>
                     <div class="card-title">
                         <div class="icon-box" style="color: #EF4444;">⚠️</div>
@@ -198,14 +198,14 @@
                 
                 <div>
                     <h3 style="font-size: 20px; color: var(--text-sub); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px;">One Fluent Request</h3>
-                    <div class="chat-bubble" style="margin-top: 0;">
+                    <div class="chat-bubble" style="margin-top: 0; margin-bottom: 20px;">
                         "Get me a priority premium ride to the airport and a chocolate ice cream."
                     </div>
                 </div>
             </div>
 
             <!-- The Solution -->
-            <div class="card card-green" style="justify-content: space-between;">
+            <div class="card card-green" style="justify-content: flex-start; gap: 30px;">
                 <div>
                     <div class="card-title">
                         <div class="icon-box">✨</div>
@@ -216,7 +216,7 @@
                     </div>
                 </div>
 
-                <div class="feature-stack" style="margin-top: 0; justify-content: space-between; height: 100%;">
+                <div class="feature-stack" style="margin-top: 0; ">
                     <div class="feature-item">
                         <div class="icon-box">🔗</div>
                         <div class="feature-text">
@@ -288,50 +288,50 @@
         <!-- 3-Column Bento Details (~620px height) -->
         <div class="grid-3">
             <!-- 1. Agent Logic -->
-            <div class="card" style="justify-content: space-between;">
+            <div class="card" style="justify-content: flex-start; gap: 40px;">
                 <div class="card-title" style="margin-bottom: 0;">
                     <div class="icon-box">ðŸ”¬</div>
                     Agent Logic
                 </div>
-                <div class="step-list" style="margin-top: 0; justify-content: space-between; height: 100%; padding-top: 25px;">
+                <div class="step-list" style="margin-top: 0; gap: 24px;">
                     <div class="step-row">
                         <div class="step-num">1</div>
                         <div class="step-desc">
                             <h4>Target Identification</h4>
-                            <p style="font-size: 16px;">Evaluates request to discover multi-app intents.</p>
+                            <p style="font-size: 18px;">Evaluates request to discover multi-app intents.</p>
                         </div>
                     </div>
                     <div class="step-row">
                         <div class="step-num">2</div>
                         <div class="step-desc">
                             <h4>Intent Segregation</h4>
-                            <p style="font-size: 16px;">Breaks compound prompt into Food vs Ride entities.</p>
+                            <p style="font-size: 18px;">Breaks compound prompt into Food vs Ride entities.</p>
                         </div>
                     </div>
                     <div class="step-row">
                         <div class="step-num">3</div>
                         <div class="step-desc">
                             <h4>Entity Mapping</h4>
-                            <p style="font-size: 16px;">Structures raw descriptions to exact API parameters.</p>
+                            <p style="font-size: 18px;">Structures raw descriptions to exact API parameters.</p>
                         </div>
                     </div>
                     <div class="step-row">
                         <div class="step-num">4</div>
                         <div class="step-desc">
                             <h4>Plan Extrapolation</h4>
-                            <p style="font-size: 16px;">Generates target carts and proactive contextual fallbacks.</p>
+                            <p style="font-size: 18px;">Generates target carts and proactive contextual fallbacks.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- 2. Deliverables -->
-            <div class="card card-green" style="justify-content: space-between;">
+            <div class="card card-green" style="justify-content: flex-start; gap: 30px;">
                 <div class="card-title" style="margin-bottom: 0;">
                     <div class="icon-box">📦</div>
                     Hackathon Deliverables
                 </div>
-                <div class="guardrail-list" style="margin-top: 0; justify-content: space-between; height: 100%; padding-top: 25px;">
+                <div class="guardrail-list" style="margin-top: 0; gap: 16px;">
                     <div class="guard-item" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: white;">
                         <div class="guard-icon" style="background: white; color: var(--grab-green);">1</div>
                         Functional Prototype (UI)
@@ -352,31 +352,31 @@
             </div>
 
             <!-- 3. Impact -->
-            <div class="card" style="justify-content: space-between;">
+            <div class="card" style="justify-content: flex-start; gap: 40px;">
                 <div class="card-title" style="margin-bottom: 0;">
                     <div class="icon-box">🎯</div>
                     Target Ecosystem Impact
                 </div>
-                <div class="step-list" style="margin-top: 0; justify-content: space-between; height: 100%; padding-top: 25px;">
+                <div class="step-list" style="gap: 20px;">
                     <div class="step-row" style="margin-bottom: 2px;">
                         <div class="step-num" style="background:#E2E8F0; border: none; color: var(--text-main); width: 32px; height: 32px; font-size: 16px;">1</div>
                         <div class="step-desc">
-                            <h4 style="font-size: 18px; color: var(--grab-green);">Customers (Active Users)</h4>
-                            <p style="font-size: 14px; line-height: 1.3;">Eliminates GUI friction. Users execute massive intent combinations rapidly, vastly saving time.</p>
+                            <h4 style="font-size: 20px; color: var(--grab-green);">Customers (Active Users)</h4>
+                            <p style="font-size: 16px; line-height: 1.3;">Eliminates GUI friction. Users execute massive intent combinations rapidly, vastly saving time.</p>
                         </div>
                     </div>
                     <div class="step-row" style="margin-bottom: 2px;">
                         <div class="step-num" style="background:#E2E8F0; border: none; color: var(--text-main); width: 32px; height: 32px; font-size: 16px;">2</div>
                         <div class="step-desc">
-                            <h4 style="font-size: 18px; color: var(--grab-green);">Underserved Segments</h4>
-                            <p style="font-size: 14px; line-height: 1.3;">Revolutionary accessibility for visually impaired/elderly through pure Natural Language voice prompts.</p>
+                            <h4 style="font-size: 20px; color: var(--grab-green);">Underserved Segments</h4>
+                            <p style="font-size: 16px; line-height: 1.3;">Revolutionary accessibility for visually impaired/elderly through pure Natural Language voice prompts.</p>
                         </div>
                     </div>
                     <div class="step-row" style="margin-bottom: 2px;">
                         <div class="step-num" style="background:#E2E8F0; border: none; color: var(--text-main); width: 32px; height: 32px; font-size: 16px;">3</div>
                         <div class="step-desc">
-                            <h4 style="font-size: 18px; color: var(--grab-green);">Financial Service Providers</h4>
-                            <p style="font-size: 14px; line-height: 1.3;">Combines vertical checkouts, maximizing Order Volume (AOV) and consolidating payment fees.</p>
+                            <h4 style="font-size: 20px; color: var(--grab-green);">Financial Service Providers</h4>
+                            <p style="font-size: 16px; line-height: 1.3;">Combines vertical checkouts, maximizing Order Volume (AOV) and consolidating payment fees.</p>
                         </div>
                     </div>
                 </div>
@@ -387,3 +387,5 @@
 
 </body>
 </html>
+
+
