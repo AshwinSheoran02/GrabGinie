@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grab Genie - Hackathon Presentation</title>
+    <style>
+        :root {
+            --grab-green: #00B14F;
+            --light-green: #DFF5E8;
+            --dark-gray: #1F2933;
+            --white: #FFFFFF;
+            --off-white: #F8F9FA;
+            --border-color: #E2E8F0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #e5e5e5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            gap: 40px;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background-color: var(--white);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+            transform-origin: top center;
+            /* Scale down for smaller screens but keep aspect ratio */
+            max-width: 100%;
+            height: auto;
+            aspect-ratio: 16/9;
+            display: flex;
+            flex-direction: column;
+            padding: 80px 100px;
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 60px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 30px;
+        }
+
+        .header h1 {
+            color: var(--dark-gray);
+            font-size: 56px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .header h1 span {
+            color: var(--grab-green);
+        }
+
+        .tagline {
+            font-size: 28px;
+            color: #64748B;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+
+        .grab-logo {
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--grab-green);
+            letter-spacing: -2px;
+        }
+
+        /* Base Grid Layouts */
+        .grid-2-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            flex: 1;
+        }
+
+        .grid-3-col {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            flex: 1;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--off-white);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-green {
+            background: var(--light-green);
+            border-color: var(--grab-green);
+        }
+
+        .card-title {
+            font-size: 28px;
+            color: var(--dark-gray);
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .card-title .icon {
+            font-size: 32px;
+            background: var(--grab-green);
+            color: var(--white);
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-title.dark .icon {
+            background: var(--dark-gray);
+        }
+
+        .text-body {
+            font-size: 22px;
+            color: #475569;
+            line-height: 1.6;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        ul li {
+            font-size: 22px;
+            color: #475569;
+            margin-bottom: 16px;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        ul li::before {
+            content: "•";
+            color: var(--grab-green);
+            font-weight: bold;
+            font-size: 30px;
+            position: absolute;
+            left: 0;
+            top: -4px;
+        }
+
+        /* Specific Visual Elements */
+        .chat-bubble {
+            background: var(--white);
+            border-radius: 24px 24px 24px 0;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            font-size: 32px;
+            font-weight: 600;
+            color: var(--dark-gray);
+            border-left: 6px solid var(--grab-green);
+            margin: 20px 0 40px 0;
+            line-height: 1.4;
+        }
+
+        .flow-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--white);
+            border-radius: 16px;
+            padding: 30px;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .flow-nodes {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .flow-node {
+            background: var(--off-white);
+            border: 2px solid var(--border-color);
+            padding: 15px 25px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 20px;
+            color: var(--dark-gray);
+            flex: 1;
+            text-align: center;
+        }
+
+        .flow-node.active {
+            background: var(--grab-green);
+            color: var(--white);
+            border-color: var(--grab-green);
+        }
+
+        .arrow {
+            color: #CBD5E1;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Diagram - Vert / Horiz */
+        .vertical-flow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .v-arrow {
+            color: var(--grab-green);
+            font-size: 24px;
+        }
+
+        .arch-node {
+            background: var(--white);
+            border: 2px solid var(--border-color);
+            padding: 20px;
+            border-radius: 16px;
+            width: 100%;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark-gray);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            position: relative;
+        }
+
+        .arch-node.sub {
+            display: flex;
+            gap: 10px;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+        }
+
+        .arch-node.sub > div {
+            flex: 1;
+            background: var(--off-white);
+            border: 2px solid var(--border-color);
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .arch-node.highlight {
+            background: var(--light-green);
+            border-color: var(--grab-green);
+            color: var(--grab-green);
+        }
+
+        /* Reasoning Step Grid */
+        .step-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .step-row {
+            display: flex;
+            align-items: center;
+            background: var(--white);
+            padding: 15px 25px;
+            border-radius: 12px;
+            border-left: 4px solid var(--grab-green);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .step-num {
+            font-weight: 800;
+            color: var(--grab-green);
+            font-size: 24px;
+            margin-right: 20px;
+            min-width: 80px;
+        }
+
+        .step-desc {
+            font-size: 20px;
+            color: var(--dark-gray);
+            font-weight: 600;
+        }
+
+        .impact-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+        }
+
+        .stat-badge {
+            text-align: center;
+            background: var(--white);
+            padding: 20px 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--grab-green);
+        }
+
+        .stat-label {
+            font-size: 18px;
+            color: #64748B;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+        
+        /* Spark Decorator */
+        .sparkle-icon {
+            position: absolute;
+            top: 60px;
+            right: 80px;
+            color: var(--grab-green);
+            opacity: 0.2;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SLIDE 1 -->
+    <div class="slide">
+        <!-- Sparkle BG Art -->
+        <svg class="sparkle-icon" width="200" height="200" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/>
+        </svg>
+
+        <div class="header">
+            <div>
+                <h1>Grab <span>Genie</span></h1>
+                <div class="tagline">AI Agent for Multi-Service Intent Orchestration</div>
+            </div>
+            <div class="grab-logo">GrabHack 2.0</div>
+        </div>
+
+        <div class="grid-2-col">
+            <!-- Left Column: The Problem & Request -->
+            <div style="display: flex; flex-direction: column; gap: 30px;">
+                <div class="card">
+                    <div class="card-title">
+                        <span class="icon" style="background:#EF4444;">⚠️</span> 
+                        The Problem
+                    </div>
+                    <div class="text-body">
+                        Super-apps contain immense utility but require users to navigate across <strong>disconnected vertical silos</strong> (Food, Ride, Mart) to complete composite tasks. Discoverability relies on manual transaction flows.
+                    </div>
+                </div>
+
+                <div>
+                    <h3 style="font-size: 24px; color: var(--dark-gray); margin-bottom: 10px; font-weight: 700;">Example Natural Request:</h3>
+                    <div class="chat-bubble">
+                        "Chocolate ice cream for me and a priority premium ride to the airport."
+                    </div>
+                </div>
+
+                <div class="flow-diagram">
+                    <h4 style="font-size: 16px; color: #64748B; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px;">One Request → One Intelligent Plan</h4>
+                    <div class="flow-nodes">
+                        <div class="flow-node">Voice / Text</div>
+                        <div class="arrow">→</div>
+                        <div class="flow-node active">Grab Genie</div>
+                        <div class="arrow">→</div>
+                        <div class="flow-node">Orchestrated Cart</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Solution & Capabilities -->
+            <div style="display: flex; flex-direction: column; gap: 30px;">
+                <div class="card card-green" style="height: 100%;">
+                    <div class="card-title">
+                        <span class="icon">✨</span> 
+                        The Solution
+                    </div>
+                    <div class="text-body" style="margin-bottom: 40px;">
+                        An intelligent orchestrator that transforms natural language into a structured, multi-service plan. It bridges the gap between user intent and Grab's expansive service ecosystem.
+                    </div>
+
+                    <div class="card-title dark" style="margin-top: auto;">
+                        <span class="icon">🚀</span> 
+                        Key Capabilities
+                    </div>
+                    <ul>
+                        <li><strong>Cross-Service Orchestration:</strong> Combines Ride, Food, and Mart items simultaneously.</li>
+                        <li><strong>Contextual AI Reasoning:</strong> Powered by Gemini to infer default constraints (e.g. matching "airport" to a Ride intent).</li>
+                        <li><strong>Proactive Alternatives:</strong> Generates smart fallback recommendations directly on the UI.</li>
+                        <li><strong>Seamless Confirmation:</strong> Review the entire multi-service plan in one holistic view.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- SLIDE 2 -->
+    <div class="slide">
+        <svg class="sparkle-icon" width="200" height="200" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/>
+        </svg>
+
+        <div class="header">
+            <div>
+                <h1>How Grab Genie <span>Works</span></h1>
+                <div class="tagline">Architecture, Reasoning & Impact</div>
+            </div>
+            <div class="grab-logo">GrabHack 2.0</div>
+        </div>
+
+        <div class="grid-3-col">
+            <!-- Col 1: Architecture Diagram -->
+            <div class="card" style="grid-column: span 1;">
+                <div class="card-title">
+                    <span class="icon">⚙️</span>
+                    Architecture
+                </div>
+                <div class="vertical-flow" style="margin-top: 20px;">
+                    <div class="arch-node">User Input</div>
+                    <div class="v-arrow">↓</div>
+                    <div class="arch-node highlight">Gemini AI (LLM)</div>
+                    <div class="v-arrow">↓</div>
+                    <div class="arch-node">Intent JSON</div>
+                    <div class="v-arrow">↓</div>
+                    <div class="arch-node">Service Planner</div>
+                    <div class="v-arrow">↓</div>
+                    <div class="arch-node sub">
+                        <div>🍦 Food</div>
+                        <div>🚗 Ride</div>
+                        <div>🛍️ Mart</div>
+                    </div>
+                    <div class="v-arrow">↓</div>
+                    <div class="arch-node">User Confirmation</div>
+                </div>
+            </div>
+
+            <!-- Col 2: Reasoning Flow & Guardrails -->
+            <div style="grid-column: span 2; display: flex; flex-direction: column; gap: 30px;">
+                <div class="card card-green">
+                    <div class="card-title">
+                        <span class="icon">🧠</span>
+                        Reasoning Flow
+                    </div>
+                    <div class="text-body" style="font-weight: 600; color: var(--grab-green); margin-bottom: 10px;">
+                        Trigger: "Chocolate ice cream + premium ride"
+                    </div>
+                    
+                    <div class="step-grid">
+                        <div class="step-row">
+                            <div class="step-num">Step 1</div>
+                            <div class="step-desc">Intent Detection (Distinguish Food vs. Ride items)</div>
+                        </div>
+                        <div class="step-row">
+                            <div class="step-num">Step 2</div>
+                            <div class="step-desc">Service Mapping (Map attributes to internal APIs)</div>
+                        </div>
+                        <div class="step-row">
+                            <div class="step-num">Step 3</div>
+                            <div class="step-desc">Plan Generation (Build combined cart schema)</div>
+                        </div>
+                        <div class="step-row">
+                            <div class="step-num">Step 4</div>
+                            <div class="step-desc">Recommendations (Look up contextual alternatives)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2-col" style="gap: 30px;">
+                    <div class="card">
+                        <div class="card-title dark">
+                            <span class="icon">🛡️</span>
+                            Guardrails
+                        </div>
+                        <ul>
+                            <li><strong>Strict JSON Schema:</strong> Output is enforced programmatically.</li>
+                            <li><strong>Validation Layer:</strong> Fallback parser kicks in if AI response drops mandatory schema context.</li>
+                            <li><strong>Prevents Hallucination:</strong> Exact text matching blocks non-existent feature injection.</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title dark">
+                            <span class="icon">📈</span>
+                            The Impact
+                        </div>
+                        <div class="impact-stats">
+                            <div class="stat-badge">
+                                <div class="stat-value">UX</div>
+                                <div class="stat-label">Faster Completion</div>
+                            </div>
+                            <div class="stat-badge">
+                                <div class="stat-value">Platform</div>
+                                <div class="stat-label">AI Super-App</div>
+                            </div>
+                        </div>
+                        <div class="text-body" style="margin-top: 20px; text-align: center; font-size: 18px;">
+                            Evolving from a transaction-driven UI to a truly intent-driven intelligent companion.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
